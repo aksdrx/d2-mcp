@@ -1,0 +1,38 @@
+# The model — every component and relationship, defined exactly once.
+# View files import this (spread import) and decide what to show.
+# This file renders the complete system on its own.
+#
+# Note: no remote `icon:` URLs on purpose — keeps renders offline-reproducible
+# (CI, air-gapped hosts). Shapes carry the semantics instead.
+
+vars: {
+  d2-config: {
+    layout-engine: tala
+    theme-id: 300
+    pad: 40
+  }
+}
+direction: right
+
+title: {
+  label: Order platform — model
+  near: top-center
+}
+
+customer: Customer {shape: person}
+web: Web App
+api: API Gateway {shape: hexagon}
+orders: Order Service
+payments: Payment Service {shape: step}
+ledger: Ledger {shape: cylinder}
+queue: Event Stream {shape: queue}
+alerts: Alerting {shape: stored_data}
+
+customer -> web: browse
+web -> api: HTTPS
+api -> orders: gRPC
+orders -> payments: charge
+payments -> ledger: INSERT
+orders -> ledger: SELECT
+orders -> queue: publish
+queue -> alerts: notify

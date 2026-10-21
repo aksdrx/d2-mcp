@@ -102,3 +102,28 @@ git ls-files '*.d2' | while read -r f; do d2 validate "$f" || exit 1; done
 - VS Code: official `terrastruct.d2` extension (syntax + preview).
 - Vim/Neovim: `terrastruct/d2-vim`.
 - Obsidian: community D2 plugin renders fences live (see d2 docs "obsidian").
+
+## Dual-plane sidecars (text + JSON next to the SVG)
+
+When the `.md` documents an architecture that agents or CI must reason about,
+render **text-plane sidecars** alongside the image:
+
+```sh
+node mcp-server/lib/mdrender.js README.md --sidecars
+# per fence → assets/<name>.svg + assets/<name>.txt + assets/<name>.relations.json
+```
+
+- `<name>.txt` — compact ASCII outline (grep-friendly summary of the diagram).
+- `<name>.relations.json` — full component/connection model (schema in
+  `reference/models-views.md`). Use it to verify code against the diagram.
+
+Commit the sidecars: reviewers (and agents) can consume the architecture without
+re-running tooling, and CI can diff them for drift.
+
+## Caveat: interactivity on GitHub
+
+GitHub renders SVGs through `<img>` tags, so `link:` navigation and `tooltip:`
+hovers in diagrams DO NOT work on github.com (they work with inline SVG,
+`<object>`, `<iframe>`, `<embed>`). Treat links/tooltips as progressive
+enhancement and keep any information they carry also in the surrounding text.
+Full matrix: `reference/troubleshooting.md`.

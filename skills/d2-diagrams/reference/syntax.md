@@ -214,6 +214,27 @@ Change theme defaults globally:
 (* -> *)[*].style.stroke-width: 2
 ```
 
+### suspend / unsuspend — model-view cuts
+
+Globs can also toggle *visibility*, which is the basis of the model-view pattern
+(see `reference/models-views.md`):
+
+```d2
+**: suspend                  # hide every shape
+(** -> **)[*]: suspend       # hide every connection
+
+*: unsuspend                # reveal all (a full view)
+(* -> *)[*]: unsuspend {    # or a filtered view: edges labeled 'charge'
+  &label: charge
+}
+(** -> **)[*]: unsuspend {  # or: everything touching payments
+  &dst: payments
+}
+```
+
+Suspended shapes stay in the model (extractors still see them); they just don't
+render — perfect for keeping one source of truth and cutting focused views.
+
 ## 9. Reserved keywords (don't use bare as keys)
 
 `label` `shape` `icon` `tooltip` `link` `near` `width` `height` `top` `left`

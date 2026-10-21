@@ -1,0 +1,13 @@
+# View: money flow only. Hide the whole model, then re-reveal
+# just the edges that charge or persist money (and their endpoints).
+...@model.d2
+
+**: suspend
+(** -> **)[*]: suspend
+
+(** -> **)[*]: unsuspend {
+  &label: charge
+}
+(** -> **)[*]: unsuspend {
+  &label: INSERT
+}

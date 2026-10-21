@@ -92,6 +92,15 @@ api -> db
 - Globs in imported files do NOT carry over — except triple globs (`***`), which are
   global.
 - Imports are relative to the importing file.
+- Single-file alternative: keep model + views in ONE file with `suspend`/
+  `unsuspend` globs — see `reference/models-views.md`. Multi-file imports shine
+  when different teams own the model; suspend/unsuspend when you want one
+  portable artifact.
+- Style-only imports: put `classes` in `styles.d2`, import with `...@styles`, and
+  apply `obj.class: [base; error]` at the consuming site.
+- Version comparison boards: model v1 and v2 as sibling containers and connect
+  them (`Users 1 -> Users 2: migration`) to visualize schema/API evolution across
+  releases or git tags.
 
 ## 5. Practical patterns
 

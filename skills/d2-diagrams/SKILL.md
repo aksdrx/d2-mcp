@@ -90,6 +90,7 @@ Copy from `examples/` (all validated) and adapt:
 | UML class diagram | `examples/uml-class.d2` | `class`, visibilities, inheritance arrowheads |
 | Flowchart | `examples/flowchart.d2` | diamonds, labeled branches |
 | Animated / multi-view | `examples/composition.d2` | `layers`, `scenarios`, `steps` |
+| Model + focused views | `examples/model-views/` | spread imports, `suspend`/`unsuspend`, filtered views |
 
 ## Embedding into Markdown files
 
@@ -99,10 +100,29 @@ GitHub etc. don't render ```` ```d2 ```` fences. Convention:
 python3 skills/d2-diagrams/scripts/render_md.py README.md
 # -> validates + renders each d2 fence to assets/README-1.svg ...
 # -> writes README.rendered.md with ![...](assets/...) after each fence
+
+node mcp-server/lib/mdrender.js README.md --sidecars   # JS pipeline (no Python)
+# -> also writes assets/<name>.txt + <name>.relations.json (text plane)
 ```
 
 Full patterns (side-by-side source+image, CI hooks, dark mode):
 `reference/markdown-integration.md`.
+
+## Two planes: diagrams for AI and for humans
+
+Every architecture diagram serves two audiences — plan for both:
+
+- **Text plane** (AI agents, CI, grep): stable object keys, labeled connections,
+  and machine-readable sidecars (`.relations.json`). Extract with
+  `node mcp-server/lib/extract.js diagram.d2 --json|--text` or MCP `d2_extract`.
+  Use the JSON to verify code against the diagram (join on dotted ids + edge
+  labels).
+- **Visual plane** (humans): `direction`, `shape`, `icon`, `theme`, `near`,
+  tooltips; run `d2 fmt`, then render and *inspect the SVG*.
+- Keep **one model**, cut focused views with `suspend`/`unsuspend` globs instead
+  of forking copies.
+
+Full workflow and JSON schema: `reference/models-views.md`.
 
 ## Common pitfalls (check before declaring done)
 
@@ -117,16 +137,22 @@ Full patterns (side-by-side source+image, CI hooks, dark mode):
 ## When the user wants MCP integration
 
 Point them to `mcp-server/` in the repo root: a stdio MCP server wrapping the d2 CLI
-(`d2_render`, `d2_validate`, `d2_fmt`, `d2_layouts`, `d2_themes`) that any
-MCP-capable harness can register. See `mcp-server/README.md`.
+with 8 tools — `d2_render`, `d2_validate` (structured errors), `d2_fmt`,
+`d2_extract` (relationships as JSON/text, no binary needed), `d2_md_render`
+(render every d2 fence in a .md, optional sidecars), `d2_layouts`, `d2_themes`,
+`d2_version` — that any MCP-capable harness can register. See `mcp-server/README.md`.
 
 ## Reference index
 
 - `reference/syntax.md` — complete language syntax (shapes, connections, containers,
-  strings, imports, vars, globs, overrides)
+  strings, imports, vars, globs, suspend/unsuspend, overrides)
 - `reference/positioning.md` — direction, near, grid, top/left, dimensions, engines
 - `reference/styling.md` — style keywords, themes, classes, globs-as-defaults
 - `reference/special-shapes.md` — sql_table, class, sequence_diagram, markdown/code/LaTeX text
 - `reference/composition.md` — layers, scenarios, steps, boards, links, imports
+- `reference/models-views.md` — model-view pattern, dual-plane JSON contract,
+  verifying code against diagrams
+- `reference/troubleshooting.md` — parse/layout/render recipes, interactivity
+  matrix, hard limits
 - `reference/cli.md` — CLI flags, env vars, exports, d2-config vars
-- `reference/markdown-integration.md` — .md embedding + render pipeline
+- `reference/markdown-integration.md` — .md embedding + render pipeline + sidecars

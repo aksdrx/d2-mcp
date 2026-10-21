@@ -1,23 +1,32 @@
 # d2-mcp-server
 
 A stdio [MCP](https://modelcontextprotocol.io) server that wraps the `d2` CLI so any
-MCP-capable agent harness can render and validate D2 diagrams as native tool calls.
+MCP-capable agent harness can render and validate D2 diagrams as native tool calls —
+plus pure-JS tools that serve the **text plane** (component relationships as JSON)
+without even needing the d2 binary.
 
 ## Tools
 
 | Tool | Purpose |
 |---|---|
-| `d2_render` | D2 source → `.svg/.png/.pdf/.pptx/.gif/.txt` file (layout/theme/sketch/pad/target/animate options) |
-| `d2_validate` | compile check; returns errors with line numbers |
-| `d2_fmt` | autoformat D2 source (gofmt-style) |
+| `d2_render` | D2 source/file → `.svg/.png/.pdf/.pptx/.gif/.txt` (layout/theme/sketch/pad/center/bundle/scale options) |
+| `d2_validate` | compile check; structured errors `[{line, col, message}]` |
+| `d2_fmt` | autoformat D2 source (gofmt-style, stdin→stdout) |
+| `d2_extract` | parse D2 into a relationship model — objects (dotted ids, labels, shapes, containers), connections (typed labels), globs, boards. `view: "text"` for a compact outline. Resolves local `@imports`. **No d2 binary needed.** |
+| `d2_md_render` | render every ```d2 fence in `.md` files; refreshes image links; optional dual-plane sidecars (`.txt` + `.relations.json`) |
 | `d2_layouts` | list layout engines on this machine |
 | `d2_themes` | list theme IDs on this machine |
+| `d2_version` | d2 CLI version string |
+
+The dual-plane contract (`d2_extract` / sidecar JSON schema) is documented in
+`../skills/d2-diagrams/reference/models-views.md`.
 
 ## Requirements
 
 - Node.js ≥ 18
 - `d2` CLI on `PATH` (installers: `../skills/d2-diagrams/scripts/install.sh` /
   `install.ps1`), or point `D2_PATH` at the binary.
+- `d2_extract` works with no binary at all (pure JS).
 
 ## Setup
 

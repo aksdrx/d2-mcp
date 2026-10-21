@@ -7,3 +7,6 @@ mcp-server/node_modules/
 
 # render scratch
 **/*.err
+
+# mcp server temp dirs (spawnFile writes them under cwd for WSL/Windows exe)
+.d2-mcp-*/

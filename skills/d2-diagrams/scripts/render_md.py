@@ -34,7 +34,17 @@ def find_d2(cli_override=None):
     return exe
 
 
+def _win_path(arg):
+    """Translate /mnt/<drive>/... POSIX paths to X:\\... for a Windows d2.exe under WSL."""
+    m = re.match(r"^(?:/mnt/|/)([a-z])/(.+)$", arg, re.IGNORECASE)
+    if m and os.path.isdir("/mnt/" + m.group(1).lower()):
+        return m.group(1).upper() + ":\\" + m.group(2).replace("/", "\\")
+    return arg
+
+
 def run_d2(d2, args, **kw):
+    if d2.lower().endswith(".exe"):
+        args = [_win_path(a) for a in args]
     return subprocess.run([d2] + args, capture_output=True, text=True,
                           encoding="utf-8", errors="replace", **kw)
 
@@ -66,12 +76,17 @@ def fence_name(info, docbase, index):
     return m.group(1) if m else f"{docbase}-{index}"
 
 
+def _tmp_d2_file():
+    """Temp .d2 under the CWD (not /tmp) so a Windows d2.exe under WSL can read it."""
+    fd, path = tempfile.mkstemp(suffix=".d2", dir=os.getcwd())
+    return os.fdopen(fd, "w", encoding="utf-8", newline="\n"), path
+
+
 def render_one(d2, source, out_path, fmt, extra):
     """Validate + render one diagram. Returns (ok, message)."""
-    with tempfile.NamedTemporaryFile("w", suffix=".d2", delete=False,
-                                     encoding="utf-8", newline="\n") as f:
+    f, tmp = _tmp_d2_file()
+    with f:
         f.write(source)
-        tmp = f.name
     try:
         v = run_d2(d2, ["validate", tmp])
         if v.returncode != 0:
@@ -118,10 +133,9 @@ def process(md_path, args, d2):
             os.makedirs(assets_dir, exist_ok=True)
             ok, msg = render_one(d2, "".join(src), out_path, args.format, extra)
         else:
-            with tempfile.NamedTemporaryFile("w", suffix=".d2", delete=False,
-                                             encoding="utf-8", newline="\n") as t:
-                t.write("".join(src))
-                tmp = t.name
+            tf, tmp = _tmp_d2_file()
+            with tf:
+                tf.write("".join(src))
             v = run_d2(d2, ["validate", tmp])
             os.unlink(tmp)
             ok, msg = v.returncode == 0, (v.stderr or v.stdout).strip()

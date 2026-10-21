@@ -119,13 +119,35 @@ GitHub/VS Code do **not** render ```` ```d2 ```` fences natively. Convention:
    after each fence.
 3. Commit both the `.md` source and the generated SVG so the docs render everywhere.
 
-Prefer SVG (clickable links/tooltips, dark-theme aware). Use PNG only for PDF/slides
-pipelines that can't take SVG; ASCII (`.txt`) for terminals and plain-text docs.
+Prefer SVG (clickable links/tooltips, dark-theme aware — note GitHub renders SVG via
+`<img>`, so links/tooltips do NOT work there; keep that info in text too). Use PNG
+only for PDF/slides pipelines that can't take SVG; ASCII (`.txt`) for terminals and
+plain-text docs.
+
+## 6b. Two planes: text-AI and human
+
+Every architecture diagram must serve BOTH audiences:
+
+- **Text plane** — extractable relationships: give every component a stable key,
+  label every connection (`HTTPS`, `gRPC`, `INSERT`). Produce sidecars with
+  `node mcp-server/lib/mdrender.js <doc>.md --sidecars` (or
+  `node mcp-server/lib/extract.js <file>.d2 --json|--text`): `<name>.txt` (compact
+  outline) + `<name>.relations.json` (machine model: objects, connections,
+  dotted-path ids). Use the JSON to verify code against the diagram.
+- **Visual plane** — the SVG humans see: choose `direction`, `shape`, themes,
+  positioning per §4; run the §2 loop and judge the rendered output.
+- **One model, many views** — keep a single `model.d2` and cut focused views with
+  spread imports (`...@model.d2`) plus `suspend`/`unsuspend` globs. See
+  `skills/d2-diagrams/examples/model-views/` and
+  `skills/d2-diagrams/reference/models-views.md`.
 
 ## 7. MCP server (optional)
 
-`mcp-server/` contains a stdio MCP server exposing `d2_render`, `d2_validate`,
-`d2_fmt`, `d2_layouts`, `d2_themes`. Register it in any MCP-capable harness
+`mcp-server/` contains a stdio MCP server exposing `d2_render`, `d2_validate`
+(structured `{line, col, message}` errors), `d2_fmt`, `d2_extract` (relationships
+as JSON/text — no d2 binary needed, resolves local imports), `d2_md_render`
+(render every d2 fence in a .md, with dual-plane sidecars), `d2_layouts`,
+`d2_themes`, `d2_version`. Register it in any MCP-capable harness
 (Claude Code/Desktop, Cursor, etc.) — see `mcp-server/README.md`.
 
 ## 8. Reference material
@@ -136,6 +158,10 @@ pipelines that can't take SVG; ASCII (`.txt`) for terminals and plain-text docs.
 - `skills/d2-diagrams/reference/styling.md` — styles, themes, classes, globs
 - `skills/d2-diagrams/reference/special-shapes.md` — sql_table, class, sequence_diagram, text/code/LaTeX
 - `skills/d2-diagrams/reference/composition.md` — layers/scenarios/steps, imports, boards
+- `skills/d2-diagrams/reference/models-views.md` — model-view pattern, dual-plane JSON
+  contract, verifying code against diagrams
+- `skills/d2-diagrams/reference/troubleshooting.md` — parse/layout/render recipes,
+  interactivity matrix, hard limits
 - `skills/d2-diagrams/reference/cli.md` — CLI flags, exports, env vars, d2-config
 - `skills/d2-diagrams/reference/markdown-integration.md` — .md embedding patterns
 - `skills/d2-diagrams/examples/` — runnable, validated examples per diagram type
