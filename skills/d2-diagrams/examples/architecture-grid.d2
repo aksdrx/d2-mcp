@@ -1,0 +1,80 @@
+# Layered architecture, positioned with grid-rows.
+# Renders identically on dagre/elk/tala.
+
+vars: {
+  d2-config: {
+    theme-id: 105
+    pad: 40
+  }
+}
+
+title: E-Commerce Platform — Layered Architecture {
+  near: top-center
+  shape: text
+  style.font-size: 28
+}
+
+classes: {
+  layer: {
+    style: {
+      border-radius: 12
+      stroke-width: 2
+    }
+  }
+  stateless: {style.fill: "#E3F2FD"}
+  stateful: {shape: cylinder; style.fill: "#FFF3E0"}
+  external: {style.stroke-dash: 4}
+}
+
+direction: down
+
+client: Client Tier {
+  class: layer
+  grid-columns: 3
+
+  web: Web App (React) {class: stateless}
+  mobile: Mobile App {class: stateless}
+  partner: Partner Portal {class: [stateless; external]}
+}
+
+edge: Edge Tier {
+  class: layer
+  grid-columns: 2
+
+  cdn: CDN {shape: cloud}
+  waf: WAF + API Gateway {class: stateless}
+}
+
+services: Service Tier {
+  class: layer
+  grid-rows: 1
+
+  orders: Orders {class: stateless}
+  payments: Payments {class: stateless}
+  search: Search {class: stateless}
+}
+
+data: Data Tier {
+  class: layer
+  grid-rows: 1
+
+  orders_db: Orders DB {class: stateful}
+  ledger: Ledger DB {class: stateful}
+  index: Search Index {class: stateful}
+}
+
+client.web -> edge.cdn
+client.mobile -> edge.waf: HTTPS
+edge.waf -> services.orders
+edge.waf -> services.payments
+edge.waf -> services.search
+services.orders -> data.orders_db
+services.payments -> data.ledger: strong consistency
+services.search -> data.index
+
+legend: {
+  near: bottom-right
+  s: Stateless service {style.fill: "#E3F2FD"}
+  d: Datastore {shape: cylinder; style.fill: "#FFF3E0"}
+  e: External / untrusted {style.stroke-dash: 4}
+}

@@ -1,0 +1,42 @@
+# Sequence diagram: actors, groups (fragments), spans (activation bars),
+# notes, self-message, styled messages.
+
+vars: {
+  d2-config: {
+    theme-id: 105
+    pad: 40
+  }
+}
+
+checkout: Checkout Flow {
+  shape: sequence_diagram
+
+  # actor order = declaration order (left to right)
+  user: Customer {shape: person}
+  web: Web SPA
+  api: Orders API
+  db: PostgreSQL {shape: cylinder}
+  stripe: Stripe {style.stroke-dash: 3}
+
+  user -> web: click "Buy"
+  web -> web: validate cart
+
+  web -> api.t1: POST /orders          # t1 opens a span (activation bar) on api
+
+  auth group: {
+    api -> db: find user + cart
+    db -> api: rows
+  }
+
+  payment group: {
+    api -> stripe: create PaymentIntent {
+      style.stroke-dash: 4             # async-looking dashed message
+    }
+    stripe -> api: client_secret
+    api.note: retry up to 3x,\nthen dead-letter
+  }
+
+  db -> api.t1: order persisted        # reply ends the span
+  api -> web: 201 Created
+  web -> user: show confirmation
+}

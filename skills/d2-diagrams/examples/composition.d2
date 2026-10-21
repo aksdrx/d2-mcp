@@ -1,0 +1,71 @@
+# Multi-board composition: layers (drill-down), scenario (incident view),
+# steps (rollout). Export ideas:
+#   d2 composition.d2 out.pdf                          # clickable pages
+#   d2 --animate-interval=1200 composition.d2 out.gif  # looping animation
+#   d2 --target='scenarios.incident' composition.d2 incident.svg
+
+vars: {
+  d2-config: {
+    theme-id: 105
+    pad: 40
+  }
+}
+
+direction: right
+
+user: User {shape: person}
+lb: Load Balancer
+app: App Server {
+  link: layers.internals   # click through to the detail board
+}
+db: PostgreSQL {shape: cylinder}
+
+user -> lb -> app -> db
+
+layers: {
+  internals: App Internals {
+    router: Router
+    auth: Auth Middleware
+    handler: Order Handler
+    pool: Connection Pool
+    router -> auth -> handler -> pool
+
+    back: ⬅ back to overview {
+      shape: text
+      link: _
+    }
+  }
+}
+
+scenarios: {
+  incident: DB outage {
+    db.style: {
+      opacity: 0.25
+      stroke-dash: 4
+    }
+    lb -> app: still routing
+    app -> db: timing out {
+      style: {
+        stroke: "#C62828"
+        animated: true
+      }
+    }
+    status: 503 spike on /orders {
+      near: top-center
+      style.font-color: "#C62828"
+    }
+  }
+}
+
+steps: {
+  canary: {
+    app.label: "App Server (v2 · 5%)"
+  }
+  half: {
+    app.label: "App Server (v2 · 50%)"
+  }
+  full: {
+    app.label: "App Server (v2 · 100%)"
+    app.style.fill: "#E8F5E9"
+  }
+}

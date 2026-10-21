@@ -1,0 +1,66 @@
+# ER diagram with sql_table shapes and crow's-foot cardinality.
+# Render with ELK or TALA for row-exact edge endpoints:
+#   d2 --layout=elk erd.d2 erd.svg
+
+vars: {
+  d2-config: {
+    layout-engine: elk
+    theme-id: 105
+    pad: 40
+  }
+}
+
+title: Orders Domain — Entity Relationship Diagram {
+  near: top-center
+  shape: text
+  style.font-size: 26
+}
+
+users: {
+  shape: sql_table
+  id: uuid {constraint: primary_key}
+  email: varchar(255) {constraint: unique}
+  name: varchar(100)
+  created_at: timestamptz
+}
+
+orders: {
+  shape: sql_table
+  id: uuid {constraint: primary_key}
+  user_id: uuid {constraint: foreign_key}
+  status: order_status
+  total: numeric(12,2)
+  placed_at: timestamptz
+}
+
+order_items: {
+  shape: sql_table
+  id: uuid {constraint: primary_key}
+  order_id: uuid {constraint: foreign_key}
+  product_id: uuid {constraint: foreign_key}
+  qty: int
+  unit_price: numeric(12,2)
+}
+
+products: {
+  shape: sql_table
+  id: uuid {constraint: primary_key}
+  sku: varchar(40) {constraint: unique}
+  title: varchar(200)
+  stock: int
+}
+
+orders.user_id -> users.id: {
+  source-arrowhead: {shape: cf-many; label: 0..n}
+  target-arrowhead: {shape: cf-one-required; label: "1"}
+}
+
+order_items.order_id -> orders.id: {
+  source-arrowhead: {shape: cf-many-required; label: 1..n}
+  target-arrowhead: {shape: cf-one-required; label: "1"}
+}
+
+order_items.product_id -> products.id: {
+  source-arrowhead: {shape: cf-many}
+  target-arrowhead: {shape: cf-one-required}
+}

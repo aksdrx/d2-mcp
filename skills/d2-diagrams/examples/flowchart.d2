@@ -1,0 +1,34 @@
+# Flowchart: decision diamonds, labeled branches, loop-back edge.
+
+vars: {
+  d2-config: {
+    theme-id: 105
+    pad: 40
+  }
+}
+
+direction: down
+
+start: Deploy requested {shape: oval}
+checks: Run CI checks {shape: parallelogram}
+green: All green? {shape: diamond}
+canary: Deploy canary (5%)
+metrics: Error rate < 0.1%? {shape: diamond}
+full: Roll out to 100% {shape: step}
+rollback: Automatic rollback {
+  style: {
+    fill: "#FFEBEE"
+    stroke: "#C62828"
+    font-color: "#C62828"
+  }
+}
+done: Deploy complete {shape: oval; style.fill: "#E8F5E9"}
+
+start -> checks -> green
+green -> canary: yes
+green -> start: "no — fix and resubmit" {style.stroke-dash: 3}
+canary -> metrics
+metrics -> full: yes
+metrics -> rollback: no
+rollback -> start: incident opened
+full -> done

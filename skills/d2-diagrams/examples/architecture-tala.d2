@@ -1,0 +1,64 @@
+# Precisely positioned architecture diagram (TALA engine).
+# - `near` pins title/legend to the canvas
+# - `near: <shape>` glues the note to a component
+# - `top`/`left` locks the client to a fixed anchor point
+# - per-container `direction` differs from the global direction
+
+vars: {
+  d2-config: {
+    layout-engine: tala
+    theme-id: 105
+    pad: 60
+  }
+}
+
+direction: right
+
+title: Order Processing — Runtime View {
+  near: top-center
+  shape: text
+  style.font-size: 26
+}
+
+customer: Customer {
+  shape: person
+  top: 80     # absolute lock: client always top-left
+  left: 60
+}
+
+platform: Order Platform {
+  direction: down   # TALA: this container flows top-down, not right
+
+  gateway: API Gateway
+  pipeline: Order Pipeline {
+    validate: Validate
+    charge: Charge Payment
+    fulfill: Fulfill
+    validate -> charge -> fulfill
+  }
+  gateway -> pipeline.validate
+}
+
+stores: Datastores {
+  direction: down
+  orders: Orders DB {shape: cylinder}
+  events: Event Log {shape: queue}
+}
+
+customer -> platform.gateway: place order
+platform.pipeline.charge -> stores.orders
+platform.pipeline.fulfill -> stores.events: publish
+
+note: |md
+  ## Charge step
+  - Idempotent via **order_id** key
+  - 3 retries, then dead-letter
+| {
+  near: platform.pipeline.charge   # TALA: sticks next to that shape
+}
+
+legend: {
+  near: bottom-center
+  sync: Synchronous
+  async: Async / event-driven
+}

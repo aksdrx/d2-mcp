@@ -1,0 +1,17 @@
+{
+  "name": "d2-mcp-server",
+  "version": "0.1.0",
+  "description": "MCP stdio server wrapping the d2 CLI: render, validate, fmt, layouts, themes.",
+  "type": "module",
+  "main": "index.js",
+  "scripts": {
+    "start": "node index.js"
+  },
+  "engines": {
+    "node": ">=18"
+  },
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "^1.17.0",
+    "zod": "^3.25.0"
+  }
+}

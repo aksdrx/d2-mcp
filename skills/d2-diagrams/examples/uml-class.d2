@@ -1,0 +1,60 @@
+# UML class diagram: visibilities, fields/methods, inheritance,
+# interface realization and composition.
+
+vars: {
+  d2-config: {
+    layout-engine: elk
+    theme-id: 105
+    pad: 40
+  }
+}
+
+direction: down
+
+Renderable: {
+  shape: class
+  +render(ctx): void
+}
+
+Shape2D: {
+  shape: class
+  #x: float
+  #y: float
+  +area(): float
+  +move(dx, dy): void
+}
+
+Circle: {
+  shape: class
+  -radius: float
+  +area(): float
+}
+
+Rect: {
+  shape: class
+  -width: float
+  -height: float
+  +area(): float
+}
+
+Canvas: {
+  shape: class
+  -shapes: "List<Shape2D>"
+  +add(s): void
+  +draw(): void
+}
+
+Shape2D <- Circle: extends {
+  target-arrowhead: {shape: triangle; style.filled: false}
+}
+Shape2D <- Rect: extends {
+  target-arrowhead: {shape: triangle; style.filled: false}
+}
+Renderable <- Shape2D: implements {
+  style.stroke-dash: 4
+  target-arrowhead: {shape: triangle; style.filled: false}
+}
+Canvas -> Shape2D: contains {
+  source-arrowhead: {shape: diamond; style.filled: true}
+  target-arrowhead: {shape: none}
+}

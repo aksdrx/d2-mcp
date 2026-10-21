@@ -1,0 +1,71 @@
+# C4-style container diagram: people, system boundary, containers with
+# technology + responsibility descriptions.
+
+vars: {
+  d2-config: {
+    theme-id: 105
+    pad: 40
+  }
+}
+
+direction: right
+
+title: Internet Banking — Container Diagram (C4 level 2) {
+  near: top-center
+  shape: text
+  style.font-size: 26
+}
+
+customer: Personal Banking Customer {
+  shape: c4-person
+  tooltip: Wants to check balances and make payments
+}
+
+bank: Internet Banking System {
+  style: {
+    stroke: "#1565C0"
+    stroke-width: 3
+    border-radius: 12
+  }
+
+  spa: Single-Page Application {
+    shape: rectangle
+    tooltip: |md
+      **Tech:** React
+      Delivers the banking UI in the browser.
+    |
+  }
+
+  mobile: Mobile App {
+    tooltip: "**Tech:** Xamarin — iOS/Android client"
+  }
+
+  api: API Application {
+    shape: hexagon
+    tooltip: "**Tech:** Java/Spring — business logic, authN/authZ"
+  }
+
+  db: Database {
+    shape: cylinder
+    tooltip: "**Tech:** Oracle — accounts, transactions"
+  }
+
+  spa -> api: JSON/HTTPS
+  mobile -> api: JSON/HTTPS
+  api -> db: JDBC
+}
+
+mainframe: Mainframe Banking System {
+  style.stroke-dash: 4
+  tooltip: Core banking ledger (existing)
+}
+
+email: E-mail System {
+  shape: cloud
+  style.stroke-dash: 4
+}
+
+customer -> bank.spa: uses
+customer -> bank.mobile: uses
+bank.api -> mainframe: payments & balances
+bank.api -> email: sends statements

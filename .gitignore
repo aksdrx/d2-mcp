@@ -1,0 +1,9 @@
+# research & tooling scratch (not part of the deliverable package)
+_research/
+_tools/
+
+# node
+mcp-server/node_modules/
+
+# render scratch
+**/*.err
