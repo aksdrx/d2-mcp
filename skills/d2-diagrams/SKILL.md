@@ -165,6 +165,9 @@ See `mcp-server/README.md`.
   verifying code against diagrams
 - `reference/visual-quality.md` — human-plane refinement ladder: layout bake-off,
   crossings, aspect, monochrome-first styling (R1–R6)
+- `reference/verifying-comprehension.md` — benchmark + procedure proving a
+  text-only agent comprehends diagram composition (parity scoring vs measured
+  geometry)
 - `reference/troubleshooting.md` — parse/layout/render recipes, interactivity
   matrix, hard limits
 - `reference/cli.md` — CLI flags, env vars, exports, d2-config vars

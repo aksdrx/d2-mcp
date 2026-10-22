@@ -1,0 +1,47 @@
+# scope: deployment topology of the orders platform
+# entry: user
+vars: { d2-config: { layout-engine: elk } }
+direction: right
+
+title: |md
+  # Deployment — EU region
+| { near: top-center }
+
+user: Customer { shape: person }
+cdn: CDN
+dns: DNS
+
+vpc: Cloud VPC {
+  lb: Load Balancer
+  web: Web Tier {
+    web1: Web App 1
+    web2: Web App 2
+  }
+  api: API Tier {
+    gateway: API Gateway
+    orders: Orders Service
+    payments: Payments Service
+  }
+  data: Data Tier {
+    db: Primary DB { shape: cylinder }
+    replica: Read Replica { shape: cylinder }
+    cache: Redis { shape: cylinder }
+  }
+}
+siem: Audit SIEM
+
+dns -> cdn: resolves
+cdn -> vpc.lb: routes
+user -> cdn: HTTPS
+user -> dns: resolves
+vpc.lb -> vpc.web.web1: HTTP
+vpc.lb -> vpc.web.web2: HTTP
+vpc.web.web1 -> vpc.api.gateway: gRPC
+vpc.web.web2 -> vpc.api.gateway: gRPC
+vpc.api.gateway -> vpc.api.orders: gRPC
+vpc.api.gateway -> vpc.api.payments: gRPC
+vpc.api.orders -> vpc.data.db: SQL
+vpc.api.payments -> vpc.data.db: SQL
+vpc.api.payments -> vpc.data.cache: SET
+vpc.data.db -> vpc.data.replica: streaming
+vpc.data.db -> siem: audit log

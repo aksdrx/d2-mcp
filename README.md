@@ -20,6 +20,7 @@ skills/d2-diagrams/
     composition.md             layers, scenarios, steps, boards, imports
     models-views.md            model-view pattern, dual-plane JSON contract, code verification
     visual-quality.md           human-plane refinement ladder: layout bake-off, crossings, aspect, monochrome-first styling
+    verifying-comprehension.md  benchmark + scoring procedure: text-only agent vs measured geometry (parity)
     troubleshooting.md         parse/layout/render recipes, interactivity matrix, limits
     cli.md                     CLI flags, env vars, exports, d2-config
     markdown-integration.md    embedding D2 in .md docs, dark mode, CI, sidecars

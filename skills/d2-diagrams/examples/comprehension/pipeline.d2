@@ -1,0 +1,32 @@
+# scope: telemetry pipeline with fan-out
+# entry: agents
+vars: { d2-config: { layout-engine: elk } }
+direction: right
+
+agents: Fleet Agents
+collector: Collector
+router: Event Router { shape: hexagon }
+
+stores: Sink Layer {
+  tsdb: Metrics Store { shape: cylinder }
+  logs: Log Store { shape: cylinder }
+  traces: Trace Store { shape: cylinder }
+  archive: Cold Archive { shape: page }
+}
+
+enrich: Enrichment Service
+dashboards: Ops Dashboards
+alerts: Alerting { shape: diamond }
+
+agents -> collector: OTLP
+collector -> router: normalized
+collector -> archive: raw batch
+router -> stores.tsdb: metrics
+router -> stores.logs: logs
+router -> stores.traces: traces
+router -> enrich: sampled
+enrich -> stores.traces: enriched
+stores.tsdb -> dashboards: queries
+stores.logs -> dashboards: queries
+stores.traces -> alerts: tail latency
+alerts -> dashboards: annotations

@@ -178,6 +178,8 @@ lets text-only agents iterate visual composition without viewing images),
   contract, verifying code against diagrams
 - `skills/d2-diagrams/reference/visual-quality.md` — human-plane refinement ladder:
   layout bake-off, crossings, aspect, monochrome-first styling
+- `skills/d2-diagrams/reference/verifying-comprehension.md` — benchmark proving
+  text-only agents comprehend composition (parity vs measured geometry)
 - `skills/d2-diagrams/reference/troubleshooting.md` — parse/layout/render recipes,
   interactivity matrix, hard limits
 - `skills/d2-diagrams/reference/cli.md` — CLI flags, exports, env vars, d2-config

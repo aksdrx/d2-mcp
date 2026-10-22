@@ -1,0 +1,39 @@
+# scope: platform team ownership grid
+# entry: oncall
+vars: { d2-config: { layout-engine: elk } }
+direction: right
+
+oncall: On-call Rotation { shape: person }
+
+services: Services { grid-columns: 3
+  auth: Auth Service
+  billing: Billing Service
+  search: Search Service
+  notify: Notification Service
+  docs: Docs Service
+  admin: Admin Console
+}
+
+datastores: Datastores { grid-columns: 2
+  authdb: Auth DB { shape: cylinder }
+  billdb: Billing DB { shape: cylinder }
+  index: Search Index { shape: cylinder }
+  cache: Shared Cache { shape: cylinder }
+}
+
+title: |md
+  # Platform ownership
+| { near: top-center }
+
+oncall -> services.auth: alerts
+services.auth -> services.billing: entitlements
+services.auth -> services.search: identity
+services.billing -> services.notify: receipts
+services.search -> services.docs: indexing
+services.admin -> services.auth: admin ops
+services.admin -> services.billing: admin ops
+services.auth -> datastores.authdb: SQL
+services.billing -> datastores.billdb: SQL
+services.search -> datastores.index: writes
+services.notify -> datastores.cache: rate limits
+services.docs -> datastores.cache: reads

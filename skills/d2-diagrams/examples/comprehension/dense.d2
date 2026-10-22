@@ -1,0 +1,30 @@
+# scope: partner integration mesh — deliberately crossing-heavy
+# entry: checkout
+vars: { d2-config: { layout-engine: elk } }
+direction: right
+
+checkout: Checkout Service
+pricing: Pricing Service
+inventory: Inventory Service
+ledger: Ledger
+notifications: Notifications
+partner_a: Partner A API
+partner_b: Partner B API
+fraud: Fraud Scoring
+vault: Secrets Vault
+
+checkout -> pricing: quote
+checkout -> inventory: reserve
+pricing -> partner_a: spot price
+pricing -> partner_b: spot price
+inventory -> partner_b: stock sync
+inventory -> partner_a: stock sync
+checkout -> fraud: score
+fraud -> partner_a: reputation
+fraud -> ledger: decision trail
+checkout -> ledger: entries
+ledger -> notifications: events
+notifications -> partner_a: webhooks
+notifications -> partner_b: webhooks
+checkout -> vault: secrets
+fraud -> vault: secrets
