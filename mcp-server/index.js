@@ -20,6 +20,7 @@ import { z } from "zod";
 import fs from "node:fs";
 import path from "node:path";
 import { spawnFile, parseDiagnostics, svgDims } from "./lib.js";
+import { analyzeSvg } from "./lib/svgmap.js";
 import { extract, toText } from "./lib/extract.js";
 import { renderMarkdown } from "./lib/mdrender.js";
 
@@ -47,6 +48,25 @@ function readInput({ source, filePath }) {
 
 function json(x) {
   return { content: [{ type: "text", text: JSON.stringify(x, null, 2) }] };
+}
+
+// Shared by d2_variants / d2_layout_map: base source text, the directory
+// relative @imports resolve from, and a direction-override wrapper (D2 has no
+// --direction CLI flag; an appended root `direction:` wins as last declaration).
+function baseSource(input) {
+  const opts = readInput(input);
+  let sourceText = opts.source;
+  let baseDir = process.cwd();
+  if (opts.inputFile) {
+    const abs = path.resolve(opts.inputFile);
+    sourceText = fs.readFileSync(abs, "utf8");
+    baseDir = path.dirname(abs);
+  }
+  return {
+    sourceText,
+    baseDir,
+    withDir: (dir) => sourceText + (dir ? "\n# variant override\ndirection: " + dir + "\n" : ""),
+  };
 }
 
 // ------------------------------------------------------------ d2_render
@@ -351,18 +371,9 @@ server.registerTool(
       return { ...json({ ok: false, error: "cannot create outDir: " + String(e.message) }), isError: true };
     }
 
-    // Base source text + the directory relative @imports resolve from. Direction
-    // has no CLI flag, so a direction variant appends a root `direction:` override
-    // (last declaration wins in D2) and renders from a temp file inside baseDir.
-    let sourceText = spawnOpts.source;
-    let baseDir = process.cwd();
-    if (spawnOpts.inputFile) {
-      const abs = path.resolve(spawnOpts.inputFile);
-      sourceText = fs.readFileSync(abs, "utf8");
-      baseDir = path.dirname(abs);
-    }
-    const withDir = (dir) =>
-      sourceText + (dir ? "\n# variant override\ndirection: " + dir + "\n" : "");
+    // Base source + import dir via the shared helper (direction overrides are
+    // appended to the source; renders go through temp files inside baseDir).
+    const base = baseSource(input);
 
     // Build the render plan: [{tag, args, path}]
     const plan = [];
@@ -374,26 +385,26 @@ server.registerTool(
           plan.push({
             tag: eng + "-" + dir,
             args: ["--layout=" + eng],
-            source: withDir(dir),
+            source: base.withDir(dir),
             path: path.join(outDir, prefix + "." + eng + "-" + dir + ".svg"),
           });
     } else {
-      const base = [];
-      if (input.layout) base.push("--layout=" + input.layout);
+      const baseArgs = [];
+      if (input.layout) baseArgs.push("--layout=" + input.layout);
       const dir = input.direction || null;
       const themes = input.themes && input.themes.length ? input.themes : [1, 0, 8];
       for (const t of themes)
         plan.push({
           tag: "theme-" + t,
-          args: [...base, "--theme=" + t],
-          source: withDir(dir),
+          args: [...baseArgs, "--theme=" + t],
+          source: base.withDir(dir),
           path: path.join(outDir, prefix + ".theme-" + t + ".svg"),
         });
       if (input.sketch)
         plan.push({
           tag: "sketch",
-          args: [...base, "--sketch"],
-          source: withDir(dir),
+          args: [...baseArgs, "--sketch"],
+          source: base.withDir(dir),
           path: path.join(outDir, prefix + ".sketch.svg"),
         });
     }
@@ -401,23 +412,102 @@ server.registerTool(
     const variants = [];
     const failed = [];
     for (const p of plan) {
-      const res = await spawnFile({ source: p.source, args: p.args, outputPath: p.path, cwd: baseDir });
+      const res = await spawnFile({ source: p.source, args: p.args, outputPath: p.path, cwd: base.baseDir });
       if (!res.ok) {
         failed.push({ tag: p.tag, error: res.stderr.trim() || res.stdout.trim() });
         continue;
       }
-      variants.push({ tag: p.tag, path: p.path, ...(svgDims(p.path) || {}) });
+      const dims = svgDims(p.path) || {};
+      let crossings;
+      try {
+        crossings = analyzeSvg(fs.readFileSync(p.path, "utf8")).analysis.crossings.length;
+      } catch {
+        /* geometry optional */
+      }
+      variants.push({ tag: p.tag, path: p.path, ...dims, ...(crossings !== undefined ? { crossings } : {}) });
+    }
+    // Data-driven winner for the bake-off: fewest crossings, then aspect closest
+    // to 1.6 (inside the 3:2-16:9 band). Lets text-only agents pick without eyes.
+    let recommended = null;
+    if (variants.length > 1) {
+      const scored = [...variants].sort(
+        (a, b) => (a.crossings ?? 99) - (b.crossings ?? 99) || Math.abs((a.aspect ?? 9) - 1.6) - Math.abs((b.aspect ?? 9) - 1.6)
+      );
+      recommended = scored[0].tag;
     }
     return json({
       ok: failed.length === 0,
       stage,
       outDir,
+      ...(recommended ? { recommended } : {}),
       variants,
       ...(failed.length ? { failed } : {}),
       hint:
         stage === "layout"
-          ? "Compare crossings/routes/aspect across variants, keep the clearest, then run stage='style' on the winner."
+          ? "recommended = fewest crossings then aspect closest to 1.6. Compare variants, keep the clearest, then run stage='style' on the winner."
           : "Keep the variant that reads best in monochrome (theme 1); color must add signal, not noise.",
+    });
+  }
+);
+
+// ------------------------------------------------------------ d2_layout_map
+server.registerTool(
+  "d2_layout_map",
+  {
+    title: "Post-layout geometry as text (for agents that cannot view images)",
+    description:
+      "Renders the diagram in-memory and returns MEASURED geometry (not predicted): " +
+      "canvas size/aspect, per-component bboxes + centers + containers, edge routes, " +
+      "crossing pairs, overlapping shapes, a discretized textMap grid, and " +
+      "relative-position predicates (left-of / above). Lets text-only agents judge " +
+      "and iterate visual composition: show the user the textMap, collect intended " +
+      "positions, adjust direction/near/grid/containers, re-run until it converges.",
+    inputSchema: {
+      ...sourceOrFile,
+      layout: layoutEnum.optional().describe("Layout engine to measure with (default: the file's own config)"),
+      direction: z.enum(["down", "up", "right", "left"]).optional().describe("Direction override to measure with"),
+      theme: z.number().int().optional().describe("Theme id (fonts slightly change geometry)"),
+      gridCols: z.number().int().min(3).max(24).optional().describe("textMap grid columns (default: auto from aspect)"),
+      gridRows: z.number().int().min(2).max(40).optional().describe("textMap grid rows (default: auto)"),
+      target: z.string().optional().describe("Board to measure, e.g. '' for root or 'scenarios.x'"),
+    },
+  },
+  async (input) => {
+    let base;
+    try {
+      base = baseSource(input);
+    } catch (e) {
+      return { ...json({ ok: false, error: String(e.message) }), isError: true };
+    }
+    const args = [];
+    if (input.layout) args.push("--layout=" + input.layout);
+    if (input.theme !== undefined) args.push("--theme=" + input.theme);
+    if (input.target !== undefined) args.push("--target=" + input.target);
+    const res = await spawnFile({
+      source: base.withDir(input.direction),
+      args,
+      cwd: base.baseDir,
+      stdout: true,
+    });
+    if (!res.ok || !res.stdout) {
+      return {
+        ...json({
+          ok: false,
+          error: (res.stderr || res.stdout || "").trim(),
+          errors: parseDiagnostics(res.stderr || ""),
+        }),
+        isError: true,
+      };
+    }
+    const map = analyzeSvg(res.stdout, {
+      grid: { cols: input.gridCols, rows: input.gridRows },
+    });
+    return json({
+      ok: true,
+      engine: input.layout || null,
+      direction: input.direction || null,
+      ...map,
+      hint: "Compare textMap/relations with the intended composition; tweak direction, near, grid-columns or containers and re-run. Fewest crossings + aspect 3:2 to 16:9 wins.",
     });
   }
 );

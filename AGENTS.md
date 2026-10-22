@@ -144,7 +144,9 @@ Every architecture diagram must serve BOTH audiences:
   with orthogonal routes, TALA for non-hierarchy/per-container direction; keep aspect
   within 3:2–16:9. Then a **style pass** on the winner: the diagram must stay
   comprehensible in monochrome (theme 1 Neutral Grey is the B&W check); at most one
-  accent color and one decoration — color adds signal, not noise. Full rules:
+  accent color and one decoration — color adds signal, not noise. Agents that cannot
+  view images: iterate with MCP `d2_layout_map` (measured geometry, crossings,
+  textMap grid, position predicates). Full rules:
   `skills/d2-diagrams/reference/visual-quality.md`.
 - **One model, many views** — keep a single `model.d2` and cut focused views with
   spread imports (`...@model.d2`) plus `suspend`/`unsuspend` globs. See
@@ -157,9 +159,12 @@ Every architecture diagram must serve BOTH audiences:
 width/height/aspect), `d2_validate` (structured `{line, col, message}` errors),
 `d2_fmt`, `d2_extract` (relationships as JSON/text + hub metrics — no d2 binary
 needed, resolves local imports), `d2_md_render` (render every d2 fence in a .md,
-with dual-plane sidecars), `d2_variants` (layout bake-off + styling variants for
-the refinement ladder), `d2_layouts`, `d2_themes`, `d2_version`. Register it in any
-MCP-capable harness (Claude Code/Desktop, Cursor, etc.) — see `mcp-server/README.md`.
+with dual-plane sidecars), `d2_variants` (layout bake-off + styling variants,
+data-driven `recommended` winner), `d2_layout_map` (measured post-layout geometry
+as text: bboxes, edge routes, crossings, textMap grid, left-of/above predicates —
+lets text-only agents iterate visual composition without viewing images),
+`d2_layouts`, `d2_themes`, `d2_version`. Register it in any MCP-capable harness
+(Claude Code/Desktop, Cursor, etc.) — see `mcp-server/README.md`.
 
 ## 8. Reference material
 

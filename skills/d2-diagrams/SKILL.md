@@ -122,7 +122,10 @@ Every architecture diagram serves two audiences — plan for both:
   (2+ engine × direction variants; ELK minimizes crossings, TALA for
   non-hierarchical; aspect 3:2–16:9) then a **style pass** (comprehensible in
   monochrome first — theme 1; ≤ 1 accent color; color adds signal, not noise).
-  MCP `d2_variants` renders either stage in one call.
+  MCP `d2_variants` renders either stage in one call. Without image viewing,
+  MCP `d2_layout_map` returns measured geometry (bboxes, edge routes,
+  crossings, a textMap grid, left-of/above predicates) to iterate composition
+  as text.
 - Keep **one model**, cut focused views with `suspend`/`unsuspend` globs instead
   of forking copies.
 
@@ -142,10 +145,11 @@ Full workflows: `reference/models-views.md` (text plane + JSON contract) and
 ## When the user wants MCP integration
 
 Point them to `mcp-server/` in the repo root: a stdio MCP server wrapping the d2 CLI
-with 9 tools — `d2_render` (returns width/height/aspect), `d2_validate` (structured
+with 10 tools — `d2_render` (returns width/height/aspect), `d2_validate` (structured
 errors), `d2_fmt`, `d2_extract` (relationships as JSON/text + hub metrics, no binary
 needed), `d2_md_render` (render every d2 fence in a .md, optional sidecars),
-`d2_variants` (layout bake-off + styling variants for the refinement ladder),
+`d2_variants` (layout bake-off + styling variants, data-driven `recommended`),
+`d2_layout_map` (measured post-layout geometry as text for blind agents),
 `d2_layouts`, `d2_themes`, `d2_version` — that any MCP-capable harness can register.
 See `mcp-server/README.md`.
 

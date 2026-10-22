@@ -14,14 +14,16 @@ without even needing the d2 binary.
 | `d2_fmt` | autoformat D2 source (gofmt-style, stdin→stdout) |
 | `d2_extract` | parse D2 into a relationship model — objects (dotted ids, labels, shapes, containers), connections (typed labels), globs, boards, and `metrics` (maxDegree + hubs needing explicit width/height). `view: "text"` for a compact outline. Resolves local `@imports`. **No d2 binary needed.** |
 | `d2_md_render` | render every ```d2 fence in `.md` files; refreshes image links; optional dual-plane sidecars (`.txt` + `.relations.json`) |
-| `d2_variants` | two-stage visual refinement: `stage:"layout"` renders an engine×direction bake-off; `stage:"style"` re-renders the winning layout under themes (default 1 Neutral Grey = monochrome check, 0 neutral, 8 colorblind-safe) ± sketch. Every variant returns `width/height/aspect`. |
+| `d2_variants` | two-stage visual refinement: `stage:"layout"` renders an engine×direction bake-off; `stage:"style"` re-renders the winning layout under themes (default 1 Neutral Grey = monochrome check, 0 neutral, 8 colorblind-safe) ± sketch. Every variant returns `width/height/aspect` + `crossings`, plus a data-driven `recommended` winner. |
+| `d2_layout_map` | measured post-layout geometry as text (no image viewing needed): canvas, component bboxes/centers/containers, edge routes, crossing pairs, overlapping shapes, `textMap` grid, `left-of`/`above` predicates — lets text-only agents iterate visual composition with user feedback. |
 | `d2_layouts` | list layout engines on this machine |
 | `d2_themes` | list theme IDs on this machine |
 | `d2_version` | d2 CLI version string |
 
 The dual-plane contract (`d2_extract` / sidecar JSON schema) is documented in
 `../skills/d2-diagrams/reference/models-views.md`; the visual refinement ladder the
-variants tool implements is in `../skills/d2-diagrams/reference/visual-quality.md`.
+variants tool implements and the blind-agent geometry workflow (`d2_layout_map`)
+are in `../skills/d2-diagrams/reference/visual-quality.md`.
 
 ## Requirements
 

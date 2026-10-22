@@ -32,7 +32,8 @@ d2 --layout=dagre --direction=right model.d2 out.dagre-right.svg
 Name them `<base>.<engine>-<direction>.svg`, compare, keep the winner (delete the rest,
 then set the winner's engine/direction *in the file* via `vars.d2-config` so renders are
 reproducible). Judge: fewest crossings, shortest important paths, sane aspect, no shape
-piled behind another.
+piled behind another. Blind (no image viewing): judge via `d2_layout_map` geometry +
+`d2_variants`' `recommended` (crossings × aspect).
 
 MCP: `d2_variants { stage: "layout", filePath, layouts: ["elk","dagre"] }` —
 returns every variant with `width/height/aspect`.
@@ -103,6 +104,30 @@ MCP: `d2_variants { stage: "style", filePath, layout: "elk", direction: "right",
 themes: [1, 0, 8], sketch: true }` — renders the monochrome check, neutral,
 colorblind-safe and hand-drawn variants in one call. Pick the one that reads best;
 again, persist the winner's `theme-id` in `vars.d2-config`.
+
+## Blind-agent workflow (no image viewing)
+
+Agents that cannot see the rendered SVG still get **measured** geometry — not a
+guess — via MCP `d2_layout_map`: canvas size/aspect, every component's bbox +
+center + container, edge routes, **crossing pairs**, overlapping shapes, a
+discretized `textMap` grid, and relative-position predicates (`left-of`,
+`above`). Iterate like this:
+
+1. **Map** — `d2_layout_map { filePath, layout, direction }` → read `textMap`,
+   `relations`, `analysis.crossings`.
+2. **Align with the user** — describe composition in map vocabulary ("payments
+   sits row 3, left of ledger"); collect intended positions the same way
+   ("queue should be right of orders").
+3. **Adjust knobs** — translate intent into D2: `direction`, `near`,
+   `grid-columns` on a container, regrouping into containers, hub
+   `width`/`height` (from `d2_extract` metrics).
+4. **Re-map and compare** — positions are deterministic per engine (except
+   TALA); re-run the map and check the predicates moved as intended. Converged
+   = crossings minimized, aspect in band, map matches user intent.
+
+The bake-off itself is also blind-friendly: `d2_variants` returns `crossings` +
+`aspect` per variant and a data-driven `recommended` tag (fewest crossings,
+then aspect closest to 1.6) — no eyes required to shortlist, only to overrule.
 
 ## Engine quick-reference
 

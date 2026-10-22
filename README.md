@@ -39,7 +39,7 @@ skills/d2-diagrams/
     render.sh / render.ps1     fmt + validate + render in one command
     render_md.py               renders ```d2 fences inside .md files (stdlib only)
 mcp-server/                    MCP stdio server: render/validate/fmt/extract/md_render/
-                               variants/layouts/themes/version (see mcp-server/README.md)
+                               variants/layout_map/layouts/themes/version (see mcp-server/README.md)
   lib/extract.js              pure-JS relationship extractor (CLI too: --json/--text)
   lib/mdrender.js              JS fence-render pipeline with dual-plane sidecars
 examples-md/demo.md            the Markdown embedding convention, end to end
