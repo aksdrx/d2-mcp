@@ -146,6 +146,18 @@ export function analyzeSvg(svgText, opts = {}) {
     } else if (decoded && CONN_RE.test(decoded)) {
       conn = connParts(decoded);
       id = decoded;
+    } else if (decoded && /[()]/.test(decoded)) {
+      // Container-scoped connection: d2 renders edges whose endpoints both live
+      // inside container X as base64("X.(a OP b)[i]") — no "K" prefix, and ids
+      // are RELATIVE to X (e.g. vpc.(web.web1 -> api.gateway)[0] means
+      // vpc.web.web1 -> vpc.api.gateway). Resolve them to absolute ids.
+      const cm = decoded.match(/^((?:[^.()]*\.)+)?\((.*)\s(<->|->|<-|--)\s(.*)\)(\[[0-9]+\])?$/);
+      if (cm) {
+        const prefix = cm[1] ? cm[1].slice(0, -1) : null;
+        const abs = (x) => (prefix && !x.startsWith(prefix + ".") ? prefix + "." + x : x);
+        conn = { src: abs(cm[2]), operator: cm[3], dst: abs(cm[4]) };
+        id = decoded;
+      }
     } else if (decoded && !/[()]/.test(decoded)) {
       id = decoded;
     }

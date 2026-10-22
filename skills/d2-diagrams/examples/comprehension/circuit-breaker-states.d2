@@ -1,0 +1,37 @@
+# Vendored from github.com/sanzgiri/patterns (CC BY 4.0)
+# reference/diagrams/src/circuit-breaker-states.d2 — community example for the comprehension benchmark
+# State machine of a Circuit Breaker
+# Categories: states, transitions
+
+direction: right
+
+CLOSED: {
+  label: "CLOSED\n\nRequests pass through.\nCounting failures."
+  shape: rectangle
+  style: { fill: "#d4f4dd"; stroke: "#2e7d32"; stroke-width: 3; border-radius: 8 }
+}
+
+OPEN: {
+  label: "OPEN\n\nAll requests fail fast.\nTimer ticking."
+  shape: rectangle
+  style: { fill: "#ffd6d6"; stroke: "#c62828"; stroke-width: 3; border-radius: 8 }
+}
+
+HALF_OPEN: {
+  label: "HALF-OPEN\n\nLet one trial request through."
+  shape: rectangle
+  style: { fill: "#fff4c2"; stroke: "#f57c00"; stroke-width: 3; border-radius: 8 }
+}
+
+CLOSED -> OPEN: "failure_count >= threshold" {
+  style: { stroke: "#c62828"; stroke-width: 2; font-color: "#c62828" }
+}
+OPEN -> HALF_OPEN: "after cooldown timeout" {
+  style: { stroke: "#f57c00"; stroke-width: 2; font-color: "#f57c00" }
+}
+HALF_OPEN -> CLOSED: "trial succeeded" {
+  style: { stroke: "#2e7d32"; stroke-width: 2; font-color: "#2e7d32" }
+}
+HALF_OPEN -> OPEN: "trial failed" {
+  style: { stroke: "#c62828"; stroke-width: 2; font-color: "#c62828" }
+}

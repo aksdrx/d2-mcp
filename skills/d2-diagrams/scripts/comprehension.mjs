@@ -121,16 +121,35 @@ async function buildOne(file) {
   }
 
   if (map.relations.length) {
-    const lr = map.relations.filter((r) => r.rel === "left-of");
-    if (lr.length) {
-      const r = lr[Math.floor(lr.length / 2)];
-      q("left-of", `In the rendered layout, which component is directly to the LEFT of "${r.b}"? (answer with one id)`, r.a, "string");
-    }
-    const ar = map.relations.filter((r) => r.rel === "above");
-    if (ar.length) {
-      const r = ar[Math.floor(ar.length / 2)];
-      q("above", `In the rendered layout, which component is directly ABOVE "${r.b}"? (answer with one id)`, r.a, "string");
-    }
+    // "directly left-of / above" must mean GEOMETRIC adjacency, not list order:
+    // pick the target (b) from the median relation, then answer with the candidate
+    // (a) that is nearest to b along that axis with positive overlap on the other.
+    const bboxOf = new Map(map.components.map((c) => [c.id, [c.x, c.y, c.w, c.h]]));
+    const directNeighbor = (rel) => {
+      const cands = map.relations.filter((r) => r.rel === rel);
+      if (!cands.length) return null;
+      const target = cands[Math.floor(cands.length / 2)].b;
+      const same = cands.filter((r) => r.b === target);
+      const tb = bboxOf.get(target);
+      if (!tb) return same[0];
+      const dist = (id) => {
+        const bb = bboxOf.get(id);
+        if (!bb) return Infinity;
+        const [ax, ay, aw, ah] = bb;
+        const [bx, by, bw, bh] = tb;
+        if (rel === "left-of") {
+          if (Math.min(ay + ah, by + bh) - Math.max(ay, by) <= 0) return Infinity;
+          return bx - (ax + aw);
+        }
+        if (Math.min(ax + aw, bx + bw) - Math.max(ax, bx) <= 0) return Infinity;
+        return by - (ay + ah);
+      };
+      return same.reduce((best, r) => (dist(r.a) < dist(best.a) ? r : best), same[0]);
+    };
+    const lr = directNeighbor("left-of");
+    if (lr) q("left-of", `In the rendered layout, which component is directly to the LEFT of "${lr.b}"? (answer with one id)`, lr.a, "string");
+    const ar = directNeighbor("above");
+    if (ar) q("above", `In the rendered layout, which component is directly ABOVE "${ar.b}"? (answer with one id)`, ar.a, "string");
   }
 
   q("crossings", `With the elk engine, how many PAIRS of connections cross each other?`, map.analysis.crossings.length, "number");

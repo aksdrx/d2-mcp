@@ -26,8 +26,16 @@ Examples live in `examples/comprehension/` — deliberately diverse:
 
 - `containers.d2` — nested deployment topology (membership, boundaries, 17 objects)
 - `dense.d2` — crossing-heavy integration mesh (4 crossing pairs under elk)
-- `grid.d2` — ownership grid (square aspect, 23 objects, grid layout)
+- `grid.d2` — ownership grid (square aspect, 13 objects, grid layout; 2 edge crossings under elk)
 - `pipeline.d2` — telemetry fan-out (hub router, wide aspect)
+- `cqrs-sequence.d2` — sequence diagram (lifelines, message order; community fixture)
+- `cdn-topology.d2` — star topology with shape glyphs (person users, cylinder POPs; community fixture)
+- `pubsub-topology.d2` — bipartite pub/sub hub (queue topics in a container; community fixture)
+- `circuit-breaker-states.d2` — 3-node state machine (long transition labels; community fixture)
+
+The four community fixtures are vendored from `github.com/sanzgiri/patterns` (CC BY 4.0),
+`reference/diagrams/src/` — real-world styles, inline style blocks, and a `sequence_diagram`
+board that stress the text plane beyond the hand-authored four.
 
 ## Procedure
 

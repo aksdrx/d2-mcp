@@ -243,15 +243,36 @@ function keyIndent(keyPart) {
 function buildTree(lines) {
   const root = { indent: -1, text: "", children: [], line: 0 };
   const stack = [root];
-  for (const ln of lines) {
+  const processLine = (ln) => {
     const t = ln.text.trim();
     if (t.startsWith("}")) {
       // a closing brace pops every block opened at or right of this indent
       while (stack.length > 1 && stack[stack.length - 1].indent >= ln.indent) stack.pop();
-      continue;
+      return;
     }
-    if (t === "") continue;
+    if (t === "") return;
     while (stack.length > 1 && stack[stack.length - 1].indent >= ln.indent) stack.pop();
+    // A block can open mid-line: "key: Label { grid-columns: 3" — the text
+    // after the unmatched "{" becomes the block's first child line. (A balanced
+    // "{...}" pair stays inline: handled as an attached map downstream.)
+    const bo = t.indexOf("{");
+    if (bo !== -1 && !/\{[\t ]*$/.test(t)) {
+      let depth = 0;
+      let close = -1;
+      for (let i = bo; i < t.length; i++) {
+        if (t[i] === "{") depth++;
+        else if (t[i] === "}") { depth--; if (depth === 0) { close = i; break; } }
+      }
+      if (close === -1) {
+        const head = t.slice(0, bo).trim();
+        const rest = t.slice(bo + 1).trim();
+        const node = { indent: ln.indent, text: head, children: [], line: ln.line };
+        stack[stack.length - 1].children.push(node);
+        stack.push(node);
+        if (rest) processLine({ indent: ln.indent + 1, text: rest, line: ln.line });
+        return;
+      }
+    }
     const opens = /\{[\t ]*$/.test(t);
     const node = {
       indent: ln.indent,
@@ -261,7 +282,8 @@ function buildTree(lines) {
     };
     stack[stack.length - 1].children.push(node);
     if (opens) stack.push(node);
-  }
+  };
+  for (const ln of lines) processLine(ln);
   return root;
 }
 
@@ -455,6 +477,14 @@ function interpretStatement(stmt, children, scopeId, model, line, opts) {
 
   // layout-only subtrees we consume but do not model (style maps, vars, ...)
   if (key === "style" || key === "vars" || key === "near") return;
+
+  // root-level reserved attributes (e.g. "shape: sequence_diagram") configure the
+  // board itself; they must not become objects (they have no geometry anyway)
+  if (scopeId === null && RESERVED_OBJ_KEYS.has(key) && !keyRaw.includes(".")) {
+    model.boardAttrs = model.boardAttrs || {};
+    model.boardAttrs[key] = unquote(value);
+    return;
+  }
   if (segsLen(segs) > 1 && RESERVED_OBJ_KEYS.has(segs[0]) && !RESERVED_OBJ_KEYS.has(segs[segs.length - 1])) {
     // e.g. "label.near: outside-top-center" or "style.fill: red"
     return;
@@ -547,7 +577,22 @@ function interpretStatement(stmt, children, scopeId, model, line, opts) {
 
 function interpretConnection(stmt, ops, colonAt, children, scopeId, model, line) {
   const head = colonAt === -1 ? stmt : stmt.slice(0, colonAt);
-  const label = colonAt === -1 ? "" : unquote(stmt.slice(colonAt + 1).trim()).replace(/:$/, "").trim();
+  // a trailing top-level "{ ... }" (inline style etc.) is not part of the label
+  let labelRaw = colonAt === -1 ? "" : stmt.slice(colonAt + 1).trim();
+  if (labelRaw.endsWith("}")) {
+    let depth = 0, inStr = null, blockStart = -1;
+    for (let i = 0; i < labelRaw.length; i++) {
+      const ch = labelRaw[i];
+      if (inStr) { if (ch === inStr && labelRaw[i - 1] !== "\\") inStr = null; continue; }
+      if (ch === '"' || ch === "'") { inStr = ch; continue; }
+      if (ch === "{") { if (depth === 0) blockStart = i; depth++; }
+      else if (ch === "}") {
+        depth--;
+        if (depth === 0 && i === labelRaw.length - 1 && blockStart > 0) { labelRaw = labelRaw.slice(0, blockStart).trim(); break; }
+      }
+    }
+  }
+  const label = colonAt === -1 ? "" : unquote(labelRaw).replace(/:$/, "").trim();
 
   if (isGlobPattern(head)) {
     recordGlob(model, head, label, line);
