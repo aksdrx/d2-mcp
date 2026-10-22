@@ -27,9 +27,10 @@ current platform:
 1. Write or edit the `.d2` file.
 2. `d2 fmt file.d2` — normalize formatting.
 3. `d2 validate file.d2` — must exit 0. Fix errors; repeat.
-4. `d2 file.d2 out.svg` — render and **inspect the SVG** to judge layout.
-   (Never rely on the output file's existence; d2 can emit partial renders on error.
-   Check exit codes.)
+4. Render **variants and inspect the SVG** — never ship the first render: compare
+   2+ `--layout`/`--direction` combos (layout bake-off), then apply a restrained
+   style pass. Judge crossings, aspect, label fit. `reference/visual-quality.md`
+   is the full checklist; MCP users: one `d2_variants` call renders a whole stage.
 5. For live iteration offer `d2 -w file.d2 out.svg` (watch mode + browser reload).
 
 ## Minimal D2 in 30 seconds
@@ -114,15 +115,19 @@ Every architecture diagram serves two audiences — plan for both:
 
 - **Text plane** (AI agents, CI, grep): stable object keys, labeled connections,
   and machine-readable sidecars (`.relations.json`). Extract with
-  `node mcp-server/lib/extract.js diagram.d2 --json|--text` or MCP `d2_extract`.
-  Use the JSON to verify code against the diagram (join on dotted ids + edge
-  labels).
-- **Visual plane** (humans): `direction`, `shape`, `icon`, `theme`, `near`,
-  tooltips; run `d2 fmt`, then render and *inspect the SVG*.
+  `node mcp-server/lib/extract.js diagram.d2 --json|--text` or MCP `d2_extract`
+  (includes `metrics`: maxDegree + hubs needing explicit width/height). Use the
+  JSON to verify code against the diagram (join on dotted ids + edge labels).
+- **Visual plane** (humans): refine in two stages — **layout bake-off**
+  (2+ engine × direction variants; ELK minimizes crossings, TALA for
+  non-hierarchical; aspect 3:2–16:9) then a **style pass** (comprehensible in
+  monochrome first — theme 1; ≤ 1 accent color; color adds signal, not noise).
+  MCP `d2_variants` renders either stage in one call.
 - Keep **one model**, cut focused views with `suspend`/`unsuspend` globs instead
   of forking copies.
 
-Full workflow and JSON schema: `reference/models-views.md`.
+Full workflows: `reference/models-views.md` (text plane + JSON contract) and
+`reference/visual-quality.md` (visual plane rules R1–R6 + refinement ladder).
 
 ## Common pitfalls (check before declaring done)
 
@@ -137,10 +142,12 @@ Full workflow and JSON schema: `reference/models-views.md`.
 ## When the user wants MCP integration
 
 Point them to `mcp-server/` in the repo root: a stdio MCP server wrapping the d2 CLI
-with 8 tools — `d2_render`, `d2_validate` (structured errors), `d2_fmt`,
-`d2_extract` (relationships as JSON/text, no binary needed), `d2_md_render`
-(render every d2 fence in a .md, optional sidecars), `d2_layouts`, `d2_themes`,
-`d2_version` — that any MCP-capable harness can register. See `mcp-server/README.md`.
+with 9 tools — `d2_render` (returns width/height/aspect), `d2_validate` (structured
+errors), `d2_fmt`, `d2_extract` (relationships as JSON/text + hub metrics, no binary
+needed), `d2_md_render` (render every d2 fence in a .md, optional sidecars),
+`d2_variants` (layout bake-off + styling variants for the refinement ladder),
+`d2_layouts`, `d2_themes`, `d2_version` — that any MCP-capable harness can register.
+See `mcp-server/README.md`.
 
 ## Reference index
 
@@ -152,6 +159,8 @@ with 8 tools — `d2_render`, `d2_validate` (structured errors), `d2_fmt`,
 - `reference/composition.md` — layers, scenarios, steps, boards, links, imports
 - `reference/models-views.md` — model-view pattern, dual-plane JSON contract,
   verifying code against diagrams
+- `reference/visual-quality.md` — human-plane refinement ladder: layout bake-off,
+  crossings, aspect, monochrome-first styling (R1–R6)
 - `reference/troubleshooting.md` — parse/layout/render recipes, interactivity
   matrix, hard limits
 - `reference/cli.md` — CLI flags, env vars, exports, d2-config vars

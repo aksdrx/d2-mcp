@@ -9,17 +9,19 @@ without even needing the d2 binary.
 
 | Tool | Purpose |
 |---|---|
-| `d2_render` | D2 source/file → `.svg/.png/.pdf/.pptx/.gif/.txt` (layout/theme/sketch/pad/center/bundle/scale options) |
+| `d2_render` | D2 source/file → `.svg/.png/.pdf/.pptx/.gif/.txt` (layout/theme/sketch/pad/center/bundle/scale options). SVG results include `width`/`height`/`aspect`. |
 | `d2_validate` | compile check; structured errors `[{line, col, message}]` |
 | `d2_fmt` | autoformat D2 source (gofmt-style, stdin→stdout) |
-| `d2_extract` | parse D2 into a relationship model — objects (dotted ids, labels, shapes, containers), connections (typed labels), globs, boards. `view: "text"` for a compact outline. Resolves local `@imports`. **No d2 binary needed.** |
+| `d2_extract` | parse D2 into a relationship model — objects (dotted ids, labels, shapes, containers), connections (typed labels), globs, boards, and `metrics` (maxDegree + hubs needing explicit width/height). `view: "text"` for a compact outline. Resolves local `@imports`. **No d2 binary needed.** |
 | `d2_md_render` | render every ```d2 fence in `.md` files; refreshes image links; optional dual-plane sidecars (`.txt` + `.relations.json`) |
+| `d2_variants` | two-stage visual refinement: `stage:"layout"` renders an engine×direction bake-off; `stage:"style"` re-renders the winning layout under themes (default 1 Neutral Grey = monochrome check, 0 neutral, 8 colorblind-safe) ± sketch. Every variant returns `width/height/aspect`. |
 | `d2_layouts` | list layout engines on this machine |
 | `d2_themes` | list theme IDs on this machine |
 | `d2_version` | d2 CLI version string |
 
 The dual-plane contract (`d2_extract` / sidecar JSON schema) is documented in
-`../skills/d2-diagrams/reference/models-views.md`.
+`../skills/d2-diagrams/reference/models-views.md`; the visual refinement ladder the
+variants tool implements is in `../skills/d2-diagrams/reference/visual-quality.md`.
 
 ## Requirements
 

@@ -10,6 +10,14 @@ D2 diagrams in this kit serve **two audiences at once**:
 
 One `.d2` source serves both. This page explains how to structure it.
 
+Two orthogonal axes, both starting from the same model:
+
+- **Views** (semantic cuts): which components/edges are shown — suspend/unsuspend
+  globs per view file. Cuts *what* is in the picture.
+- **Variants** (visual alternatives): how the same view is laid out and styled —
+  engine × direction bake-off, then themes. Changes *how* the picture looks.
+  See `reference/visual-quality.md` for the two-stage refinement ladder.
+
 ## The model-view pattern (suspend/unsuspend)
 
 Real architectures have too many components to show in one picture. Instead of
@@ -141,6 +149,10 @@ join/anti-join on the two JSON graphs — no graph database required.
 
 ## Authoring checklist for dual-plane diagrams
 
+- State the diagram's context in the source header — `# scope: checkout flow`,
+  `# entry: api.gateway` — and `link` the owning doc (`link: ../design.md`); a
+  text-only agent reading the `.d2` or its sidecar must know what the diagram is
+  *for* and where it sits in the project.
 - Give every object an explicit, stable key (`payments`, not `p`) — the key is the
   id in the relations JSON.
 - Label connections with the *kind* of interaction (`HTTPS`, `gRPC`, `INSERT`,

@@ -26,12 +26,17 @@ For EVERY diagram you create or edit, run this loop until it passes:
 ```sh
 d2 fmt diagram.d2          # normalize formatting (idempotent)
 d2 validate diagram.d2     # MUST exit 0 — fix and repeat until it does
-d2 diagram.d2 diagram.svg  # render; judge layout from the SVG, not your imagination
+d2 --layout=elk  --direction=right diagram.d2 a.svg  # layout bake-off:
+d2 --layout=elk  --direction=down  diagram.d2 b.svg  # render 2+ variants,
+d2 --layout=dagre --direction=right diagram.d2 c.svg  # inspect, pick the winner
 ```
 
 Never claim a diagram is "done" without a successful `d2 validate`. Never use the
 existence of the output file as success — d2 can write partial renders on error.
-Always check the exit code.
+Always check the exit code. For architecture diagrams the bake-off is not optional:
+persist the winning engine/direction/theme in `vars: {d2-config: {...}}` so renders
+are reproducible. Full rules (crossings, aspect 3:2–16:9, monochrome-first styling):
+`skills/d2-diagrams/reference/visual-quality.md`. MCP shortcut: `d2_variants`.
 
 ## 3. Syntax rules that prevent 90% of agent errors
 
@@ -134,8 +139,13 @@ Every architecture diagram must serve BOTH audiences:
   `node mcp-server/lib/extract.js <file>.d2 --json|--text`): `<name>.txt` (compact
   outline) + `<name>.relations.json` (machine model: objects, connections,
   dotted-path ids). Use the JSON to verify code against the diagram.
-- **Visual plane** — the SVG humans see: choose `direction`, `shape`, themes,
-  positioning per §4; run the §2 loop and judge the rendered output.
+- **Visual plane** — the SVG humans see: refine in two stages. First a **layout
+  bake-off** (§2): compare 2+ engine × direction variants — ELK minimizes crossings
+  with orthogonal routes, TALA for non-hierarchy/per-container direction; keep aspect
+  within 3:2–16:9. Then a **style pass** on the winner: the diagram must stay
+  comprehensible in monochrome (theme 1 Neutral Grey is the B&W check); at most one
+  accent color and one decoration — color adds signal, not noise. Full rules:
+  `skills/d2-diagrams/reference/visual-quality.md`.
 - **One model, many views** — keep a single `model.d2` and cut focused views with
   spread imports (`...@model.d2`) plus `suspend`/`unsuspend` globs. See
   `skills/d2-diagrams/examples/model-views/` and
@@ -143,12 +153,13 @@ Every architecture diagram must serve BOTH audiences:
 
 ## 7. MCP server (optional)
 
-`mcp-server/` contains a stdio MCP server exposing `d2_render`, `d2_validate`
-(structured `{line, col, message}` errors), `d2_fmt`, `d2_extract` (relationships
-as JSON/text — no d2 binary needed, resolves local imports), `d2_md_render`
-(render every d2 fence in a .md, with dual-plane sidecars), `d2_layouts`,
-`d2_themes`, `d2_version`. Register it in any MCP-capable harness
-(Claude Code/Desktop, Cursor, etc.) — see `mcp-server/README.md`.
+`mcp-server/` contains a stdio MCP server exposing `d2_render` (returns
+width/height/aspect), `d2_validate` (structured `{line, col, message}` errors),
+`d2_fmt`, `d2_extract` (relationships as JSON/text + hub metrics — no d2 binary
+needed, resolves local imports), `d2_md_render` (render every d2 fence in a .md,
+with dual-plane sidecars), `d2_variants` (layout bake-off + styling variants for
+the refinement ladder), `d2_layouts`, `d2_themes`, `d2_version`. Register it in any
+MCP-capable harness (Claude Code/Desktop, Cursor, etc.) — see `mcp-server/README.md`.
 
 ## 8. Reference material
 
@@ -160,6 +171,8 @@ as JSON/text — no d2 binary needed, resolves local imports), `d2_md_render`
 - `skills/d2-diagrams/reference/composition.md` — layers/scenarios/steps, imports, boards
 - `skills/d2-diagrams/reference/models-views.md` — model-view pattern, dual-plane JSON
   contract, verifying code against diagrams
+- `skills/d2-diagrams/reference/visual-quality.md` — human-plane refinement ladder:
+  layout bake-off, crossings, aspect, monochrome-first styling
 - `skills/d2-diagrams/reference/troubleshooting.md` — parse/layout/render recipes,
   interactivity matrix, hard limits
 - `skills/d2-diagrams/reference/cli.md` — CLI flags, exports, env vars, d2-config

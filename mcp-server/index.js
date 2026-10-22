@@ -19,7 +19,7 @@ import { StdioServerTransport } from "@modelcontextprotocol/sdk/server/stdio.js"
 import { z } from "zod";
 import fs from "node:fs";
 import path from "node:path";
-import { spawnFile, parseDiagnostics } from "./lib.js";
+import { spawnFile, parseDiagnostics, svgDims } from "./lib.js";
 import { extract, toText } from "./lib/extract.js";
 import { renderMarkdown } from "./lib/mdrender.js";
 
@@ -104,10 +104,12 @@ server.registerTool(
       return { ...json({ ok: false, error: String(e.message) }), isError: true };
     }
     const res = await spawnFile({ ...spawnOpts, args, outputPath });
+    let dims;
+    if (res.ok && outputPath && /[.]svg$/i.test(outputPath)) dims = svgDims(outputPath);
     return {
       ...json(
         res.ok
-          ? { ok: true, outputPath, message: res.stderr.trim() || "rendered" }
+          ? { ok: true, outputPath, message: res.stderr.trim() || "rendered", ...(dims || {}) }
           : {
               ok: false,
               error: res.stderr.trim() || res.stdout.trim(),
@@ -299,6 +301,124 @@ server.registerTool(
       content: [{ type: "text", text: res.ok ? res.stdout : res.stderr }],
       isError: !res.ok,
     };
+  }
+);
+
+// ------------------------------------------------------------ d2_variants
+server.registerTool(
+  "d2_variants",
+  {
+    title: "Render layout or styling variants for comparison",
+    description:
+      "Two-stage refinement ladder for the visual plane. stage='layout' renders an "+
+      "engine x direction bake-off (default elk/dagre x right/down) so you can pick the "+
+      "clearest structure. stage='style' re-renders ONE chosen layout under several "+
+      "themes (default 1 Neutral Grey = the black-and-white readability check, "+
+      "0 Neutral Default, 8 Colorblind Clear; pass your own theme ids) plus optionally "+
+      "a --sketch variant. Every variant returns width/height/aspect from the SVG. "+
+      "Inspect the files, pick the winner, delete the rest. Style rule: the diagram "+
+      "must stay comprehensible in the monochrome variant — color adds signal, not noise.",
+    inputSchema: {
+      ...sourceOrFile,
+      stage: z.enum(["layout", "style"]).optional().describe("Refinement stage (default 'layout')"),
+      layouts: z.array(z.enum(["dagre", "elk", "tala"])).optional().describe("Engines for stage='layout' (default ['elk','dagre'])"),
+      directions: z.array(z.enum(["down", "up", "right", "left"])).optional().describe("Directions for stage='layout' (default ['right','down'])"),
+      layout: layoutEnum.optional().describe("Fixed engine for stage='style' (else the file's own config)"),
+      direction: z.enum(["down", "up", "right", "left"]).optional().describe("Fixed direction for stage='style'"),
+      themes: z.array(z.number().int()).optional().describe("Theme ids for stage='style' (default [1,0,8]: grey B&W check, neutral, colorblind-safe)"),
+      sketch: z.boolean().optional().describe("stage='style': also render a hand-drawn variant"),
+      outDir: z.string().optional().describe("Directory for outputs (default 'variants', relative to cwd)"),
+      prefix: z.string().optional().describe("Output basename (default: input filename or 'diagram')"),
+    },
+  },
+  async (input) => {
+    const stage = input.stage || "layout";
+    let spawnOpts;
+    try {
+      spawnOpts = readInput(input);
+    } catch (e) {
+      return { ...json({ ok: false, error: String(e.message) }), isError: true };
+    }
+    const outDir = input.outDir || "variants";
+    const prefix =
+      input.prefix ||
+      (spawnOpts.inputFile
+        ? path.basename(spawnOpts.inputFile).replace(/[.]d2$/i, "")
+        : "diagram");
+    try {
+      fs.mkdirSync(outDir, { recursive: true });
+    } catch (e) {
+      return { ...json({ ok: false, error: "cannot create outDir: " + String(e.message) }), isError: true };
+    }
+
+    // Base source text + the directory relative @imports resolve from. Direction
+    // has no CLI flag, so a direction variant appends a root `direction:` override
+    // (last declaration wins in D2) and renders from a temp file inside baseDir.
+    let sourceText = spawnOpts.source;
+    let baseDir = process.cwd();
+    if (spawnOpts.inputFile) {
+      const abs = path.resolve(spawnOpts.inputFile);
+      sourceText = fs.readFileSync(abs, "utf8");
+      baseDir = path.dirname(abs);
+    }
+    const withDir = (dir) =>
+      sourceText + (dir ? "\n# variant override\ndirection: " + dir + "\n" : "");
+
+    // Build the render plan: [{tag, args, path}]
+    const plan = [];
+    if (stage === "layout") {
+      const engines = input.layouts && input.layouts.length ? input.layouts : ["elk", "dagre"];
+      const dirs = input.directions && input.directions.length ? input.directions : ["right", "down"];
+      for (const eng of engines)
+        for (const dir of dirs)
+          plan.push({
+            tag: eng + "-" + dir,
+            args: ["--layout=" + eng],
+            source: withDir(dir),
+            path: path.join(outDir, prefix + "." + eng + "-" + dir + ".svg"),
+          });
+    } else {
+      const base = [];
+      if (input.layout) base.push("--layout=" + input.layout);
+      const dir = input.direction || null;
+      const themes = input.themes && input.themes.length ? input.themes : [1, 0, 8];
+      for (const t of themes)
+        plan.push({
+          tag: "theme-" + t,
+          args: [...base, "--theme=" + t],
+          source: withDir(dir),
+          path: path.join(outDir, prefix + ".theme-" + t + ".svg"),
+        });
+      if (input.sketch)
+        plan.push({
+          tag: "sketch",
+          args: [...base, "--sketch"],
+          source: withDir(dir),
+          path: path.join(outDir, prefix + ".sketch.svg"),
+        });
+    }
+
+    const variants = [];
+    const failed = [];
+    for (const p of plan) {
+      const res = await spawnFile({ source: p.source, args: p.args, outputPath: p.path, cwd: baseDir });
+      if (!res.ok) {
+        failed.push({ tag: p.tag, error: res.stderr.trim() || res.stdout.trim() });
+        continue;
+      }
+      variants.push({ tag: p.tag, path: p.path, ...(svgDims(p.path) || {}) });
+    }
+    return json({
+      ok: failed.length === 0,
+      stage,
+      outDir,
+      variants,
+      ...(failed.length ? { failed } : {}),
+      hint:
+        stage === "layout"
+          ? "Compare crossings/routes/aspect across variants, keep the clearest, then run stage='style' on the winner."
+          : "Keep the variant that reads best in monochrome (theme 1); color must add signal, not noise.",
+    });
   }
 );
 

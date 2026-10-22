@@ -19,6 +19,7 @@ skills/d2-diagrams/
     special-shapes.md          sql_table, class, sequence_diagram, markdown/code/LaTeX
     composition.md             layers, scenarios, steps, boards, imports
     models-views.md            model-view pattern, dual-plane JSON contract, code verification
+    visual-quality.md           human-plane refinement ladder: layout bake-off, crossings, aspect, monochrome-first styling
     troubleshooting.md         parse/layout/render recipes, interactivity matrix, limits
     cli.md                     CLI flags, env vars, exports, d2-config
     markdown-integration.md    embedding D2 in .md docs, dark mode, CI, sidecars
@@ -38,7 +39,7 @@ skills/d2-diagrams/
     render.sh / render.ps1     fmt + validate + render in one command
     render_md.py               renders ```d2 fences inside .md files (stdlib only)
 mcp-server/                    MCP stdio server: render/validate/fmt/extract/md_render/
-                               layouts/themes/version (see mcp-server/README.md)
+                               variants/layouts/themes/version (see mcp-server/README.md)
   lib/extract.js              pure-JS relationship extractor (CLI too: --json/--text)
   lib/mdrender.js              JS fence-render pipeline with dual-plane sidecars
 examples-md/demo.md            the Markdown embedding convention, end to end
@@ -92,11 +93,14 @@ Set the engine in-file for reproducibility:
 The same diagram serves both audiences:
 
 ```sh
-# visual plane (humans)
-d2 architecture.d2 architecture.svg
+# visual plane (humans) — refine in two stages:
+#   1. layout bake-off: compare engines x directions, pick the clearest
+#   2. style pass: monochrome-readable base (theme 1), <= 1 accent color
+d2 --layout=elk --direction=right architecture.d2 a.svg
+d2 --layout=elk --direction=down  architecture.d2 b.svg
 
 # text plane (AI agents, CI)
-node mcp-server/lib/extract.js architecture.d2 --text    # compact outline
+node mcp-server/lib/extract.js architecture.d2 --text    # compact outline + hub metrics
 node mcp-server/lib/extract.js architecture.d2 --json    # relations model
 
 # both at once, for every fence in a doc
@@ -104,9 +108,14 @@ node mcp-server/lib/mdrender.js README.md --sidecars
 # → assets/<name>.svg + assets/<name>.txt + assets/<name>.relations.json
 ```
 
+MCP users get the whole refinement ladder as one tool: `d2_variants` renders a
+layout bake-off (`stage: "layout"`) or styling variants including the monochrome
+check (`stage: "style"`) with width/height/aspect per variant.
+
 The `.relations.json` sidecar (objects with dotted-path ids, connections with typed
 labels) is the join point for **verifying code against diagrams** — see
-`skills/d2-diagrams/reference/models-views.md`.
+`skills/d2-diagrams/reference/models-views.md`; visual rules live in
+`skills/d2-diagrams/reference/visual-quality.md`.
 
 ## Design principles baked in
 

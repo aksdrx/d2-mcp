@@ -678,6 +678,22 @@ function boardToPOJO(m, opts) {
   return out;
 }
 
+/** Visual-plane hints: degree counts, hubs (degree >= 4) that need explicit width/height. */
+function computeMetrics(objects, connections) {
+  const degree = new Map();
+  const bump = (id) => degree.set(id, (degree.get(id) || 0) + 1);
+  for (const c of connections) {
+    bump(c.src);
+    bump(c.dst);
+  }
+  let maxDegree = 0;
+  for (const d of degree.values()) if (d > maxDegree) maxDegree = d;
+  const hubs = [];
+  for (const [id, d] of degree) if (d >= 4) hubs.push({ id, degree: d });
+  hubs.sort((a, b) => b.degree - a.degree || a.id.localeCompare(b.id));
+  return { objects: objects.length, connections: connections.length, maxDegree, hubs };
+}
+
 // ------------------------------------------------- public API
 
 /**
@@ -708,9 +724,10 @@ export function extract(source, opts = {}) {
   result.blockStrings = blocks.map((b) => ({ key: b.key.replace(/:\s*$/, ""), content: b.content, line: b.line }));
   result.warnings = warnings.concat(model.warnings);
   if (opts.resolveDir) resolveImports(result, opts.resolveDir, new Set());
+  result.metrics = computeMetrics(result.objects, result.connections);
   if (opts.board && model.boards[opts.board]) {
     const b = model.boards[opts.board];
-    return { ...b, ok: true, board: opts.board, boards: model.boards, warnings: result.warnings };
+    return { ...b, ok: true, board: opts.board, boards: model.boards, warnings: result.warnings, metrics: computeMetrics(b.objects, b.connections) };
   }
   return result;
 }
@@ -801,6 +818,12 @@ export function toText(model) {
   out.push(`connections (${conns.length}):`);
   for (const c of conns) {
     out.push(`  ${c.src} ${c.operator} ${c.dst}${c.label ? " : " + c.label : ""}`);
+  }
+  const m = model.metrics;
+  if (m) {
+    out.push(`metrics: ${m.objects} objects, ${m.connections} connections, maxDegree ${m.maxDegree}`);
+    if (m.hubs.length)
+      out.push("hubs (degree>=4, give explicit width/height): " + m.hubs.map((h) => h.id + " (" + h.degree + ")").join(", "));
   }
   if (model.imports && model.imports.length) {
     out.push("imports: " + model.imports.map((i) => (i.spread ? "..." : "") + i.path + (i.alias ? " as " + i.alias : "")).join(", "));

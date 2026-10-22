@@ -1,6 +1,6 @@
 // Shared spawn helper: run the d2 binary cross-platform (Windows/macOS/Linux/WSL).
 import { spawn } from "node:child_process";
-import { mkdtempSync, writeFileSync, rmSync, existsSync } from "node:fs";
+import { mkdtempSync, writeFileSync, rmSync, existsSync, readFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 
@@ -21,6 +21,25 @@ function childPath(p) {
     }
   }
   return p;
+}
+
+/**
+ * Read an SVG's intrinsic size (d2 writes width="N" height="N" on <svg>).
+ * Returns {width, height, aspect} rounded, or null if unreadable.
+ */
+export function svgDims(svgPath) {
+  try {
+    const m = readFileSync(svgPath, "utf8")
+      .slice(0, 600)
+      .match(/<svg[^>]*?\bwidth="(\d+(?:\.\d+)?)"[^>]*?\bheight="(\d+(?:\.\d+)?)"/s);
+    if (!m) return null;
+    const width = Math.round(Number(m[1]));
+    const height = Math.round(Number(m[2]));
+    if (!width || !height) return null;
+    return { width, height, aspect: Math.round((width / height) * 100) / 100 };
+  } catch {
+    return null;
+  }
 }
 
 /**
@@ -56,7 +75,7 @@ export function parseDiagnostics(text) {
  * @param {boolean} [o.stdout]     use `-` as output so result lands on stdout (fmt)
  * @returns {Promise<{ok:boolean, stdout:string, stderr:string, code:number}>}
  */
-export function spawnFile({ source, inputFile, stdinInput, args = [], subcommand, outputPath, stdout }) {
+export function spawnFile({ source, inputFile, stdinInput, args = [], subcommand, outputPath, stdout, cwd }) {
   return new Promise((resolve) => {
     let dir;
     const done = (result) => {
@@ -78,8 +97,10 @@ export function spawnFile({ source, inputFile, stdinInput, args = [], subcommand
       if (inputFile) {
         full.push(childPath(inputFile));
       } else if (source !== undefined) {
-        // keep the temp file under cwd so a Windows d2.exe under WSL can read it
-        dir = mkdtempSync(join(process.cwd(), ".d2-mcp-"));
+        // keep the temp file near the input's directory so a Windows d2.exe under
+        // WSL can read it AND relative @imports resolve on both CWD-based (win exe)
+        // and file-based (native) import resolution
+        dir = mkdtempSync(join(cwd || process.cwd(), ".d2-mcp-"));
         const input = join(dir, "input.d2");
         writeFileSync(input, source, "utf8");
         full.push(childPath(input));
@@ -87,7 +108,13 @@ export function spawnFile({ source, inputFile, stdinInput, args = [], subcommand
       if (outputPath) full.push(childPath(outputPath));
       else if (stdout) full.push("-");
 
-      const child = spawn(d2Bin(), full, { windowsHide: true, stdio: [stdinInput ? "pipe" : "ignore", "pipe", "pipe"] });
+      const child = spawn(d2Bin(), full, {
+        windowsHide: true,
+        // cwd must stay a POSIX path (Node resolves it; WSL interop maps a /mnt/...
+        // cwd to the Windows equivalent for the exe). Args are childPath-ed above.
+        ...(cwd ? { cwd: String(cwd) } : {}),
+        stdio: [stdinInput ? "pipe" : "ignore", "pipe", "pipe"],
+      });
     if (stdinInput) {
       child.stdin.write(stdinInput);
       child.stdin.end();

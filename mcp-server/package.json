@@ -1,7 +1,7 @@
 {
   "name": "d2-mcp-server",
-  "version": "0.1.0",
-  "description": "MCP stdio server wrapping the d2 CLI: render, validate, fmt, layouts, themes.",
+  "version": "0.3.0",
+  "description": "MCP stdio server wrapping the d2 CLI: render (with SVG dims), validate (structured errors), fmt, relationship extraction (text plane), markdown fence pipeline with sidecars, layout/style variant bake-offs, layouts, themes, version.",
   "type": "module",
   "main": "index.js",
   "scripts": {
