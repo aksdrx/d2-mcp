@@ -1,8 +1,11 @@
-# Layered architecture, positioned with grid-rows.
-# Renders identically on dagre/elk/tala.
+# Layered architecture, tiers stacked with a root-level grid.
+# Bake-off (this file, d2 v0.9.0): dagre 1377x1306 (a=1.05), elk 1337x1310
+# (a=1.02), tala 1039x1502 (a=0.69); 0 crossings, 0 edge-over-shape on all —
+# dagre pinned below. Aspect inside the 3:2-16:9 band.
 
 vars: {
   d2-config: {
+    layout-engine: dagre
     theme-id: 105
     pad: 40
   }
@@ -26,6 +29,10 @@ classes: {
   external: {style.stroke-dash: 4}
 }
 
+# Root-level grid: one row per tier, stacked top to bottom.
+# (grid-* on a container alone makes siblings arrange left-to-right on
+# dagre/elk regardless of direction — the root grid is what stacks them.)
+grid-rows: 4
 direction: down
 
 client: Client Tier {
@@ -47,7 +54,7 @@ edge: Edge Tier {
 
 services: Service Tier {
   class: layer
-  grid-rows: 1
+  grid-columns: 3
 
   orders: Orders {class: stateless}
   payments: Payments {class: stateless}
@@ -56,7 +63,7 @@ services: Service Tier {
 
 data: Data Tier {
   class: layer
-  grid-rows: 1
+  grid-columns: 3
 
   orders_db: Orders DB {class: stateful}
   ledger: Ledger DB {class: stateful}

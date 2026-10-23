@@ -298,6 +298,8 @@ export function analyzeSvg(svgText, opts = {}) {
     textMap = lines.join("\n");
   }
 
+  const compById = new Map(components.map((c) => [c.id, c]));
+
   // relative-position predicates between near-enough components
   const relations = [];
   const diag = Math.hypot(bounds ? bounds.x1 - bounds.x0 : 1, bounds ? bounds.y1 - bounds.y0 : 1);
@@ -319,11 +321,74 @@ export function analyzeSvg(svgText, opts = {}) {
     if (relations.length > 60) break;
   }
 
+  // ---- edge-over-shape slicing: an edge route passing through a shape it is
+  // not connected to. Slicing a LEAF shape is always a defect; slicing a
+  // CONTAINER is only legitimate for ancestors of the edge's endpoints (an
+  // edge must exit its source container and enter its target container).
+  const ancestorsOf = new Map();
+  const ancestorSet = (id) => {
+    if (ancestorsOf.has(id)) return ancestorsOf.get(id);
+    const set = new Set();
+    let cur = compById.get(id);
+    while (cur && cur.container) { set.add(cur.container); cur = compById.get(cur.container); }
+    ancestorsOf.set(id, set);
+    return set;
+  };
+  const segHitsBBox = (x1, y1, x2, y2, bx, by, bw, bh) => {
+    // slab-method segment vs AABB; endpoints exactly on the border do not count
+    const pad = 2;
+    const minX = bx + pad, maxX = bx + bw - pad, minY = by + pad, maxY = by + bh - pad;
+    if (minX >= maxX || minY >= maxY) return false;
+    let t0 = 0, t1 = 1;
+    const dx = x2 - x1, dy = y2 - y1;
+    const clip = (p, q) => {
+      if (p === 0) return q >= 0;
+      const r = q / p;
+      if (p < 0) { if (r > t1) return false; if (r > t0) t0 = r; }
+      else { if (r < t0) return false; if (r < t1) t1 = r; }
+      return true;
+    };
+    if (!clip(-dx, x1 - minX)) return false;
+    if (!clip(dx, maxX - x1)) return false;
+    if (!clip(-dy, y1 - minY)) return false;
+    if (!clip(dy, maxY - y1)) return false;
+    return t1 - t0 > 0.02; // ignore grazing corner touches
+  };
+  // SVG class ids occasionally decode with trailing garbage; match on cleaned ids
+  const cleanId = (id) => String(id).replace(/[^\x20-\x7E].*$/, "");
+  const cleanCompById = new Map(components.map((c) => [cleanId(c.id), c]));
+  const cleanAncestors = (id) => {
+    const set = new Set();
+    let cur = cleanCompById.get(cleanId(id));
+    while (cur && cur.container) { set.add(cleanId(cur.container)); cur = cleanCompById.get(cleanId(cur.container)); }
+    return set;
+  };
+  const edgeOverlaps = [];
+  for (const e of edges) {
+    const legit = new Set([e.src, e.dst, ...cleanAncestors(e.src), ...cleanAncestors(e.dst)]);
+    // descendants of a container endpoint are legitimately traversed on entry
+    for (const c of components) {
+      if (legit.has(e.src) && cleanId(c.id).startsWith(e.src + ".")) legit.add(cleanId(c.id));
+      if (legit.has(e.dst) && cleanId(c.id).startsWith(e.dst + ".")) legit.add(cleanId(c.id));
+    }
+    for (let i = 0; i + 1 < e.waypoints.length; i++) {
+      const [x1, y1] = e.waypoints[i];
+      const [x2, y2] = e.waypoints[i + 1];
+      for (const c of components) {
+        if (legit.has(c.id) || legit.has(cleanId(c.id)) || c.id === "title") continue;
+        if (segHitsBBox(x1, y1, x2, y2, c.x, c.y, c.w, c.h)) {
+          edgeOverlaps.push({ edge: e.id, shape: cleanId(c.id) });
+          break; // one hit per shape is enough; keep scanning segments
+        }
+      }
+    }
+  }
+
   return {
     canvas,
     components,
     edges,
-    analysis: { crossings, overlapping, labelIssues },
+    analysis: { crossings, overlapping, labelIssues, edgeOverlaps },
     textMap,
     relations,
   };

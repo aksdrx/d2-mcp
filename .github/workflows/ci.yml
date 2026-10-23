@@ -50,6 +50,8 @@ jobs:
             rm -f "$d/$b.ci.svg"
           done < <(find skills examples-md -name '*.d2' | sort)
           exit $status
+      - name: Visual-quality gate (aspect, edge-over-shape) on showcase examples
+        run: node skills/d2-diagrams/scripts/visual-gate.mjs
       - name: Text-plane extraction succeeds for every .d2
         run: |
           status=0

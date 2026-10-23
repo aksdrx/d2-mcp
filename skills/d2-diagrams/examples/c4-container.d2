@@ -3,12 +3,16 @@
 
 vars: {
   d2-config: {
+    layout-engine: dagre
     theme-id: 105
     pad: 40
   }
 }
 
-direction: right
+# Bake-off (d2 v0.9.0): dagre/down 1088x1055 (a=1.03, 0 crossings,
+# 0 slices) wins; elk/down is 0.41 tall, dagre/right 2.66 with an edge slicing
+# the mainframe. Direction down + dagre pinned below.
+direction: down
 
 title: Internet Banking — Container Diagram (C4 level 2) {
   near: top-center

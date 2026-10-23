@@ -168,3 +168,11 @@ TALA when you need whiteboard-style control.**
 - [ ] ≤ 1 accent color, ≤ 1 decoration style
 - [ ] Legend present when using ≥ 3 visual meanings
 - [ ] Text plane sidecars generated (`--sidecars` / `d2_extract`)
+
+## Machine-checked gates
+
+- Machine gates: `scripts/visual-gate.mjs` fails on aspect outside 0.4..2.5 or any
+  edge-over-shape slice (arrow crossing a shape it is not connected to) in the
+  showcase examples; `d2_layout_map` reports both as `analysis.crossings` and
+  `analysis.edgeOverlaps`. Sequence diagrams are exempt from the slice check
+  (lifelines legitimately traverse groups).

@@ -507,7 +507,7 @@ server.registerTool(
       engine: input.layout || null,
       direction: input.direction || null,
       ...map,
-      hint: "Compare textMap/relations with the intended composition; tweak direction, near, grid-columns or containers and re-run. Fewest crossings + aspect 3:2 to 16:9 wins.",
+      hint: "Compare textMap/relations with the intended composition; tweak direction, near, grid-columns or containers and re-run. Fewest crossings + aspect 3:2 to 16:9 wins. analysis.edgeOverlaps lists arrows slicing shapes they are not connected to — fix with direction, hub width/height, or by splitting the view. (Sequence diagrams: lifeline traversals of groups are expected.)"
     });
   }
 );

@@ -116,6 +116,10 @@ c
   routing on TALA. Connections to/from a grid container itself work normally.
 - Grids nest: put grids, sequence diagrams, or normal containers inside grid cells.
 - `grid-gap: 0` builds seamless maps/tables; consider Markdown tables for dense data.
+- **Caveat (dagre/elk):** `grid-rows`/`grid-columns` on a container makes that container's
+  siblings arrange left-to-right even when the root declares `direction: down` —
+  the grid emulation overrides the flow. To stack grid tiers vertically, put the
+  tiers in a root-level `grid-rows: N` (see `examples/architecture-grid.d2`).
 
 ## 4. width / height — sizing
 
