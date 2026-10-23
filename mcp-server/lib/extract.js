@@ -792,11 +792,15 @@ function resolveImports(model, dir, visited) {
       model.warnings.push("circular import skipped: " + imp.path);
       continue;
     }
-    let src;
-    try {
-      src = readFileSync ? readFileSync(file, "utf8") : null;
-    } catch {
-      src = null;
+    // d2 accepts extensionless imports (@model === @model.d2); try exact, then +.d2
+    let src = null;
+    for (const candidate of file.endsWith(".d2") ? [file] : [file, file + ".d2"]) {
+      try {
+        src = readFileSync(candidate, "utf8");
+        if (src != null) break;
+      } catch {
+        src = null;
+      }
     }
     if (src == null) {
       model.warnings.push("import not resolved (file unreadable): " + imp.path);

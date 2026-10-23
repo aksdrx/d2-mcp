@@ -1,0 +1,67 @@
+name: CI
+on:
+  push:
+    branches: [master, main]
+  pull_request:
+
+jobs:
+  kit:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Install d2 CLI (user-local)
+        run: |
+          sh skills/d2-diagrams/scripts/install.sh
+          echo "$HOME/.local/bin" >> "$GITHUB_PATH"
+      - name: Show tool versions
+        run: d2 version && node --version
+      - name: Install MCP server dependencies
+        working-directory: mcp-server
+        run: npm ci
+      - name: JS syntax check
+        run: |
+          for f in mcp-server/index.js mcp-server/lib.js mcp-server/lib/*.js mcp-server/smoke.mjs skills/d2-diagrams/scripts/comprehension.mjs; do
+            node --check "$f"
+          done
+      - name: Every .d2 is canonically formatted
+        run: |
+          mkdir -p /tmp/ci-fmt && status=0
+          while IFS= read -r f; do
+            cp "$f" /tmp/ci-fmt/t.d2 && d2 fmt --write /tmp/ci-fmt/t.d2 >/dev/null 2>&1
+            diff -q /tmp/ci-fmt/t.d2 "$f" >/dev/null || { echo "NOT FORMATTED: $f (run: d2 fmt --write $f)"; status=1; }
+          done < <(find skills examples-md -name '*.d2' | sort)
+          exit $status
+      - name: Every .d2 validates
+        run: |
+          status=0
+          while IFS= read -r f; do
+            d2 validate "$f" >/dev/null || { echo "INVALID: $f"; status=1; }
+          done < <(find skills examples-md -name '*.d2' | sort)
+          exit $status
+      - name: Every .d2 renders with its pinned engine
+        run: |
+          status=0
+          while IFS= read -r f; do
+            d=$(dirname "$f"); b=$(basename "$f" .d2)
+            ( cd "$d" && d2 "$b.d2" "$b.ci.svg" >/dev/null 2>&1 ) || { echo "RENDER FAIL: $f"; status=1; }
+            rm -f "$d/$b.ci.svg"
+          done < <(find skills examples-md -name '*.d2' | sort)
+          exit $status
+      - name: Text-plane extraction succeeds for every .d2
+        run: |
+          status=0
+          while IFS= read -r f; do
+            node mcp-server/lib/extract.js "$f" --json 2>/dev/null | grep -q '"ok": true' || { echo "EXTRACT FAIL: $f"; status=1; }
+          done < <(find skills examples-md -name '*.d2' | sort)
+          exit $status
+      - name: Comprehension battery regenerates (8 fixtures, full keys)
+        run: |
+          node skills/d2-diagrams/scripts/comprehension.mjs generate skills/d2-diagrams/examples/comprehension --out /tmp/battery --d2 "$(command -v d2)"
+          node -e 'const t=require("/tmp/battery/comprehension-test.json"); const k=require("/tmp/battery/comprehension-key.json"); if(t.tests.length!==8) process.exit(1); for(const x of t.tests){ if(x.questions.length<8) process.exit(2); const key=k[x.dossier.file]||{}; for(const q of x.questions) if(!(q.id in key)) process.exit(3); }'
+      - name: Markdown fence pipeline stays renderable (check-only)
+        run: python3 skills/d2-diagrams/scripts/render_md.py --check-only examples-md/demo.md
+      - name: MCP server smoke test (10 tools)
+        run: node mcp-server/smoke.mjs

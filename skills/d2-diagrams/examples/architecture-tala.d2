@@ -22,12 +22,12 @@ title: Order Processing — Runtime View {
 
 customer: Customer {
   shape: person
-  top: 80     # absolute lock: client always top-left
+  top: 80 # absolute lock: client always top-left
   left: 60
 }
 
 platform: Order Platform {
-  direction: down   # TALA: this container flows top-down, not right
+  direction: down # TALA: this container flows top-down, not right
 
   gateway: API Gateway
   pipeline: Order Pipeline {
@@ -54,7 +54,7 @@ note: |md
   - Idempotent via **order_id** key
   - 3 retries, then dead-letter
 | {
-  near: platform.pipeline.charge   # TALA: sticks next to that shape
+  near: platform.pipeline.charge # TALA: sticks next to that shape
 }
 
 legend: {

@@ -21,7 +21,7 @@ checkout: Checkout Flow {
   user -> web: click "Buy"
   web -> web: validate cart
 
-  web -> api.t1: POST /orders          # t1 opens a span (activation bar) on api
+  web -> api.t1: POST /orders # t1 opens a span (activation bar) on api
 
   auth group: {
     api -> db: find user + cart
@@ -30,13 +30,13 @@ checkout: Checkout Flow {
 
   payment group: {
     api -> stripe: create PaymentIntent {
-      style.stroke-dash: 4             # async-looking dashed message
+      style.stroke-dash: 4 # async-looking dashed message
     }
     stripe -> api: client_secret
     api.note: retry up to 3x,\nthen dead-letter
   }
 
-  db -> api.t1: order persisted        # reply ends the span
+  db -> api.t1: order persisted # reply ends the span
   api -> web: 201 Created
   web -> user: show confirmation
 }

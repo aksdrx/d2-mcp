@@ -1,5 +1,9 @@
 # D2 Diagrams — Agent & Skill Package
 
+[![CI](https://github.com/OWNER/d2-diagrams/actions/workflows/ci.yml/badge.svg)](https://github.com/OWNER/d2-diagrams/actions/workflows/ci.yml)
+[![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
+[![d2](https://img.shields.io/badge/d2-v0.9.0-7C4DFF.svg)](https://d2lang.com)
+
 Everything an AI agent (or human) needs to author **software architecture and design
 diagrams in [D2](https://d2lang.com)**: control component positions, embed diagrams
 in Markdown, serve **two planes at once** — polished visuals for humans *and*
@@ -24,7 +28,8 @@ skills/d2-diagrams/
     troubleshooting.md         parse/layout/render recipes, interactivity matrix, limits
     cli.md                     CLI flags, env vars, exports, d2-config
     markdown-integration.md    embedding D2 in .md docs, dark mode, CI, sidecars
-  examples/                    9 diagrams, all validated AND rendered (SVG included)
+  examples/                    20 diagrams, all validated AND rendered (SVG included)
+    (8 standalone + 4 model-views + 8 comprehension-battery fixtures)
     architecture-grid.d2       layered architecture via grid-rows/columns
     architecture-tala.d2       absolute/top-left + near-shape positioning (TALA)
     c4-container.d2            C4 container diagram
@@ -132,6 +137,21 @@ labels) is the join point for **verifying code against diagrams** — see
 5. **Every diagram is two-plane.** The `.d2` source is the model; the SVG is the
    human view; the extracted `.relations.json` is the machine view. Keep all
    three in sync by regenerating sidecars in the same commit.
+
+## Continuous integration
+
+Every push and PR runs [.github/workflows/ci.yml](.github/workflows/ci.yml):
+all 20 diagrams must be canonically formatted (`d2 fmt`), validate cleanly,
+render with their pinned engine, and extract a text-plane model; the markdown
+fence pipeline must stay renderable; the MCP server must pass its 10-tool
+smoke test ([mcp-server/smoke.mjs](mcp-server/smoke.mjs)); and the comprehension
+battery must regenerate with complete keys.
+
+## License
+
+[MIT](LICENSE) — except the four vendored comprehension fixtures under
+`skills/d2-diagrams/examples/comprehension/`, which are CC BY 4.0 with
+attribution in [NOTICE.md](NOTICE.md).
 
 ## Sources
 

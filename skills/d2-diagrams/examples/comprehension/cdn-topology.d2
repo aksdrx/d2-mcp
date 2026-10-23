@@ -3,23 +3,23 @@
 # CDN topology: origin + edge nodes near users
 direction: down
 
-US_user: "US user" { shape: person }
-EU_user: "EU user" { shape: person }
-ASIA_user: "Asia user" { shape: person }
+US_user: "US user" {shape: person}
+EU_user: "EU user" {shape: person}
+ASIA_user: "Asia user" {shape: person}
 
-Edge_US: "Edge POP\n(Virginia)" { shape: cylinder; style: { fill: "#bbdefb"; stroke: "#1565c0"; stroke-width: 2 } }
-Edge_EU: "Edge POP\n(Frankfurt)" { shape: cylinder; style: { fill: "#c8e6c9"; stroke: "#2e7d32"; stroke-width: 2 } }
-Edge_ASIA: "Edge POP\n(Singapore)" { shape: cylinder; style: { fill: "#f8bbd0"; stroke: "#ad1457"; stroke-width: 2 } }
+Edge_US: "Edge POP\n(Virginia)" {shape: cylinder; style: {fill: "#bbdefb"; stroke: "#1565c0"; stroke-width: 2}}
+Edge_EU: "Edge POP\n(Frankfurt)" {shape: cylinder; style: {fill: "#c8e6c9"; stroke: "#2e7d32"; stroke-width: 2}}
+Edge_ASIA: "Edge POP\n(Singapore)" {shape: cylinder; style: {fill: "#f8bbd0"; stroke: "#ad1457"; stroke-width: 2}}
 
 Origin: "Origin Server\n(your cloud / data center)" {
   shape: rectangle
-  style: { fill: "#fff4c2"; stroke: "#f57c00"; stroke-width: 3; border-radius: 10 }
+  style: {fill: "#fff4c2"; stroke: "#f57c00"; stroke-width: 3; border-radius: 10}
 }
 
-US_user -> Edge_US: "fast (low RTT)" { style: { stroke: "#1565c0" } }
-EU_user -> Edge_EU: "fast" { style: { stroke: "#2e7d32" } }
-ASIA_user -> Edge_ASIA: "fast" { style: { stroke: "#ad1457" } }
+US_user -> Edge_US: "fast (low RTT)" {style: {stroke: "#1565c0"}}
+EU_user -> Edge_EU: "fast" {style: {stroke: "#2e7d32"}}
+ASIA_user -> Edge_ASIA: "fast" {style: {stroke: "#ad1457"}}
 
-Edge_US -> Origin: "fetch on cache miss" { style: { stroke: "#bdbdbd"; stroke-dash: 4 } }
-Edge_EU -> Origin: "fetch on cache miss" { style: { stroke: "#bdbdbd"; stroke-dash: 4 } }
-Edge_ASIA -> Origin: "fetch on cache miss" { style: { stroke: "#bdbdbd"; stroke-dash: 4 } }
+Edge_US -> Origin: "fetch on cache miss" {style: {stroke: "#bdbdbd"; stroke-dash: 4}}
+Edge_EU -> Origin: "fetch on cache miss" {style: {stroke: "#bdbdbd"; stroke-dash: 4}}
+Edge_ASIA -> Origin: "fetch on cache miss" {style: {stroke: "#bdbdbd"; stroke-dash: 4}}

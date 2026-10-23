@@ -10,26 +10,26 @@ Projector: "Projection"
 ReadStore: "Read Store"
 QueryAPI: "Query API"
 
-Client -> WriteAPI: "1. POST command" { style: { stroke: "#1565c0" } }
+Client -> WriteAPI: "1. POST command" {style: {stroke: "#1565c0"}}
 WriteAPI -> WriteStore: "2. validate + persist"
 WriteStore -> WriteAPI: "3. ack"
-WriteAPI -> Client: "4. 202 Accepted\n(write done; read not yet up-to-date)" { style: { stroke: "#1565c0" } }
+WriteAPI -> Client: "4. 202 Accepted\n(write done; read not yet up-to-date)" {style: {stroke: "#1565c0"}}
 
-WriteStore -> Projector: "5. change event\n(async)" { style: { stroke: "#f57c00"; stroke-dash: 3 } }
-Projector -> ReadStore: "6. apply projection" { style: { stroke: "#f57c00"; stroke-dash: 3 } }
+WriteStore -> Projector: "5. change event\n(async)" {style: {stroke: "#f57c00"; stroke-dash: 3}}
+Projector -> ReadStore: "6. apply projection" {style: {stroke: "#f57c00"; stroke-dash: 3}}
 
 staleness_window: "STALENESS WINDOW (ms\u2013s)" {
-  style: { fill: "#ffe0b2"; font-color: "#bf360c"; bold: true }
-  Client -> QueryAPI: "7a. immediate read" { style: { stroke: "#c62828" } }
+  style: {fill: "#ffe0b2"; font-color: "#bf360c"; bold: true}
+  Client -> QueryAPI: "7a. immediate read" {style: {stroke: "#c62828"}}
   QueryAPI -> ReadStore: "8a. fetch"
-  ReadStore -> QueryAPI: "9a. STALE value" { style: { stroke: "#c62828" } }
-  QueryAPI -> Client: "10a. stale response" { style: { stroke: "#c62828" } }
+  ReadStore -> QueryAPI: "9a. STALE value" {style: {stroke: "#c62828"}}
+  QueryAPI -> Client: "10a. stale response" {style: {stroke: "#c62828"}}
 }
 
 after_projection: "AFTER PROJECTION" {
-  style: { fill: "#c8e6c9"; font-color: "#1b5e20"; bold: true }
-  Client -> QueryAPI: "7b. later read" { style: { stroke: "#2e7d32" } }
+  style: {fill: "#c8e6c9"; font-color: "#1b5e20"; bold: true}
+  Client -> QueryAPI: "7b. later read" {style: {stroke: "#2e7d32"}}
   QueryAPI -> ReadStore: "8b. fetch"
-  ReadStore -> QueryAPI: "9b. FRESH value" { style: { stroke: "#2e7d32" } }
-  QueryAPI -> Client: "10b. fresh response" { style: { stroke: "#2e7d32" } }
+  ReadStore -> QueryAPI: "9b. FRESH value" {style: {stroke: "#2e7d32"}}
+  QueryAPI -> Client: "10b. fresh response" {style: {stroke: "#2e7d32"}}
 }

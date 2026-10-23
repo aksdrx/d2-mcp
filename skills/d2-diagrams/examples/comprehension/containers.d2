@@ -1,13 +1,13 @@
 # scope: deployment topology of the orders platform
 # entry: user
-vars: { d2-config: { layout-engine: elk } }
+vars: {d2-config: {layout-engine: elk}}
 direction: right
 
 title: |md
   # Deployment — EU region
-| { near: top-center }
+| {near: top-center}
 
-user: Customer { shape: person }
+user: Customer {shape: person}
 cdn: CDN
 dns: DNS
 
@@ -23,9 +23,9 @@ vpc: Cloud VPC {
     payments: Payments Service
   }
   data: Data Tier {
-    db: Primary DB { shape: cylinder }
-    replica: Read Replica { shape: cylinder }
-    cache: Redis { shape: cylinder }
+    db: Primary DB {shape: cylinder}
+    replica: Read Replica {shape: cylinder}
+    cache: Redis {shape: cylinder}
   }
 }
 siem: Audit SIEM

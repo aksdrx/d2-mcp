@@ -3,21 +3,21 @@
 # Pub-Sub: topic-based broker decouples publishers from subscribers
 direction: down
 
-P1: "Publisher\n(Orders Service)" { style: { fill: "#e3f2fd"; stroke: "#1565c0"; border-radius: 8 } }
-P2: "Publisher\n(Inventory Service)" { style: { fill: "#e3f2fd"; stroke: "#1565c0"; border-radius: 8 } }
+P1: "Publisher\n(Orders Service)" {style: {fill: "#e3f2fd"; stroke: "#1565c0"; border-radius: 8}}
+P2: "Publisher\n(Inventory Service)" {style: {fill: "#e3f2fd"; stroke: "#1565c0"; border-radius: 8}}
 
 Broker: "Pub-Sub Broker (Kafka / SNS / NATS)" {
   shape: rectangle
-  style: { fill: "#fff4c2"; stroke: "#f57c00"; stroke-width: 3; border-radius: 10 }
+  style: {fill: "#fff4c2"; stroke: "#f57c00"; stroke-width: 3; border-radius: 10}
 
-  T1: "Topic: order-events" { shape: queue; style: { fill: "#fff" } }
-  T2: "Topic: stock-events" { shape: queue; style: { fill: "#fff" } }
+  T1: "Topic: order-events" {shape: queue; style: {fill: "#fff"}}
+  T2: "Topic: stock-events" {shape: queue; style: {fill: "#fff"}}
 }
 
-S1: "Subscriber\n(Billing)" { style: { fill: "#e8f5e9"; stroke: "#2e7d32"; border-radius: 8 } }
-S2: "Subscriber\n(Shipping)" { style: { fill: "#e8f5e9"; stroke: "#2e7d32"; border-radius: 8 } }
-S3: "Subscriber\n(Analytics)" { style: { fill: "#e8f5e9"; stroke: "#2e7d32"; border-radius: 8 } }
-S4: "Subscriber\n(Notifier)" { style: { fill: "#e8f5e9"; stroke: "#2e7d32"; border-radius: 8 } }
+S1: "Subscriber\n(Billing)" {style: {fill: "#e8f5e9"; stroke: "#2e7d32"; border-radius: 8}}
+S2: "Subscriber\n(Shipping)" {style: {fill: "#e8f5e9"; stroke: "#2e7d32"; border-radius: 8}}
+S3: "Subscriber\n(Analytics)" {style: {fill: "#e8f5e9"; stroke: "#2e7d32"; border-radius: 8}}
+S4: "Subscriber\n(Notifier)" {style: {fill: "#e8f5e9"; stroke: "#2e7d32"; border-radius: 8}}
 
 P1 -> Broker.T1: "publish OrderPlaced"
 P2 -> Broker.T2: "publish StockLow"
