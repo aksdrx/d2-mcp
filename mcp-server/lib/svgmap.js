@@ -34,6 +34,33 @@ function connParts(id) {
   return { src: m[1], operator: m[2], dst: m[3] };
 }
 
+function parseTextEl(chunk) {
+  const m = chunk.match(/<text([^>]*)>([^<]*)<\/text>/);
+  if (!m) return null;
+  const tag = "<text" + m[1] + ">";
+  const style = (tag.match(/style="([^"]*)"/) || [])[1] || "";
+  const fsm = style.match(/font-size:\s*([0-9.]+)px/);
+  const unesc = (s) => s.replace(/&lt;/g, "<").replace(/&gt;/g, ">").replace(/&quot;/g, '"').replace(/&#39;/g, "'").replace(/&amp;/g, "&");
+  return {
+    x: attrOf(tag, "x"),
+    y: attrOf(tag, "y"),
+    fs: fsm ? Number(fsm[1]) : 16,
+    middle: /text-anchor:\s*middle/.test(style),
+    text: unesc(m[2].trim()),
+  };
+}
+
+/** Estimated text bbox from a text element: anchor + string length
+ *  (sans-serif averages ~0.62em per glyph). Good enough for overlap tests. */
+function labelBoxOf(t) {
+  if (!t || t.x === null || t.y === null) return null;
+  const fs = t.fs || 16;
+  const w = Math.max((t.text || "").length * fs * 0.62, fs);
+  const h = fs * 1.25;
+  const x = t.middle ? t.x - w / 2 : t.x;
+  return { x, y: t.y - fs * 0.9, w, h };
+}
+
 /** Tokenize an SVG path d-string into absolute points + bbox (curves are
  *  approximated by their control points — good enough for maps/crossings). */
 export function parsePathD(d) {
@@ -117,6 +144,7 @@ export function analyzeSvg(svgText, opts = {}) {
   const components = [];
   const edges = [];
   const topLevel = [];
+  const docOrder = []; // {i, kind, id} — document order equals SVG paint order
   let depth = 0;
   let start = -1;
   for (const m of svgText.matchAll(/<g\b[^>]*>|<\/g>/g)) {
@@ -131,7 +159,8 @@ export function analyzeSvg(svgText, opts = {}) {
       depth++;
     }
   }
-  for (const chunk of topLevel) {
+  for (let ti = 0; ti < topLevel.length; ti++) {
+    const chunk = topLevel[ti];
     const cls = (chunk.match(/class="([^"]*)"/) || [])[1];
     if (!cls) continue;
     // Connections render as "K" + base64("(src OP dst)[i]") — test the stripped
@@ -162,6 +191,7 @@ export function analyzeSvg(svgText, opts = {}) {
       id = decoded;
     }
     if (!id) continue;
+    docOrder.push({ i: ti, kind: conn ? "edge" : "shape", id });
 
     const rect = chunk.match(/<rect[^>]*>/);
     const pathTags = chunk.match(/<path[^>]*>/g) || [];
@@ -173,10 +203,11 @@ export function analyzeSvg(svgText, opts = {}) {
       const dm = routeTag.match(/ d="([^"]*)"/);
       if (!dm) continue;
       const { points } = parsePathD(dm[1]);
-      const labelPos = textTag
-        ? { x: attrOf(textTag[0], "x"), y: attrOf(textTag[0], "y") }
-        : null;
-      edges.push({ id, src: conn.src, dst: conn.dst, label: labelPos, waypoints: points.map(([x, y]) => [Math.round(x), Math.round(y)]) });
+      const lt = textTag ? parseTextEl(chunk) : null;
+      const labelPos = lt ? { x: lt.x, y: lt.y } : null;
+      const e = { id, src: conn.src, dst: conn.dst, label: labelPos, waypoints: points.map(([x, y]) => [Math.round(x), Math.round(y)]) };
+      if (lt) { e.labelText = lt.text; e.labelFs = lt.fs; e.labelBox = labelBoxOf(lt); }
+      edges.push(e);
       continue;
     }
 
@@ -210,7 +241,10 @@ export function analyzeSvg(svgText, opts = {}) {
       container: null,
     };
     if (textTag) {
-      c.label = { x: attrOf(textTag[0], "x"), y: attrOf(textTag[0], "y") };
+      const t = parseTextEl(chunk);
+      c.label = t
+        ? { x: t.x, y: t.y, text: t.text, fs: t.fs, middle: t.middle, box: labelBoxOf(t) }
+        : { x: attrOf(textTag[0], "x"), y: attrOf(textTag[0], "y") };
     }
     components.push(c);
   }
@@ -363,6 +397,24 @@ export function analyzeSvg(svgText, opts = {}) {
     while (cur && cur.container) { set.add(cleanId(cur.container)); cur = cleanCompById.get(cleanId(cur.container)); }
     return set;
   };
+  // ---- paint order (z-order): document order = SVG paint order, later wins.
+  const lastIdxOf = new Map();
+  for (const d of docOrder) lastIdxOf.set(d.kind + ":" + cleanId(d.id), d.i);
+  const idxOf = (kind, id) => {
+    const v = lastIdxOf.get(kind + ":" + cleanId(id));
+    return v === undefined ? -1 : v;
+  };
+  const shapeIdxs = docOrder.filter((d) => d.kind === "shape").map((d) => d.i);
+  const edgeIdxs = docOrder.filter((d) => d.kind === "edge").map((d) => d.i);
+  const zOrder = {
+    shapes: shapeIdxs.length,
+    edges: edgeIdxs.length,
+    // true when every connection group paints after every shape group
+    edgesPaintOverShapes: shapeIdxs.length > 0 && edgeIdxs.length > 0
+      ? Math.min(...edgeIdxs) > Math.max(...shapeIdxs)
+      : null,
+  };
+
   const edgeOverlaps = [];
   for (const e of edges) {
     const legit = new Set([e.src, e.dst, ...cleanAncestors(e.src), ...cleanAncestors(e.dst)]);
@@ -377,18 +429,67 @@ export function analyzeSvg(svgText, opts = {}) {
       for (const c of components) {
         if (legit.has(c.id) || legit.has(cleanId(c.id)) || c.id === "title") continue;
         if (segHitsBBox(x1, y1, x2, y2, c.x, c.y, c.w, c.h)) {
-          edgeOverlaps.push({ edge: e.id, shape: cleanId(c.id) });
+          edgeOverlaps.push({ edge: e.id, shape: cleanId(c.id), onTop: idxOf("edge", e.id) > idxOf("shape", c.id) });
           break; // one hit per shape is enough; keep scanning segments
         }
       }
     }
   }
 
+  // ---- edge-over-label: an edge route crossing a text label it does not own
+  const edgeOverLabels = [];
+  const sameEnds = (e, f) =>
+    (e.src === f.src && e.dst === f.dst) || (e.src === f.dst && e.dst === f.src);
+  const segBox = (e, box) => {
+    if (!box) return false;
+    for (let i = 0; i + 1 < e.waypoints.length; i++) {
+      if (segHitsBBox(e.waypoints[i][0], e.waypoints[i][1], e.waypoints[i + 1][0], e.waypoints[i + 1][1], box.x, box.y, box.w, box.h)) return true;
+    }
+    return false;
+  };
+  for (const e of edges) {
+    const legit = new Set([cleanId(e.src), cleanId(e.dst), ...cleanAncestors(e.src), ...cleanAncestors(e.dst)]);
+    for (const c of components) {
+      if (c.id === "title" || !c.label || !c.label.box) continue;
+      if (legit.has(cleanId(c.id))) continue;
+      if (segBox(e, c.label.box)) {
+        edgeOverLabels.push({ edge: e.id, labelOf: cleanId(c.id), kind: "shape", onTop: idxOf("edge", e.id) > idxOf("shape", c.id) });
+      }
+    }
+    for (const f of edges) {
+      if (f === e || sameEnds(e, f) || !f.labelBox) continue;
+      if (segBox(e, f.labelBox)) {
+        edgeOverLabels.push({ edge: e.id, labelOf: f.id, kind: "edge-label", onTop: idxOf("edge", e.id) > idxOf("edge", f.id) });
+      }
+    }
+  }
+
+  // ---- label vs label: two text labels whose estimated boxes overlap
+  const owners = [];
+  for (const c of components) {
+    if (!c.label || !c.label.box) continue;
+    owners.push({ id: cleanId(c.id), kind: c.id === "title" ? "title" : "shape", box: c.label.box });
+  }
+  for (const e of edges) {
+    if (!e.labelBox) continue;
+    owners.push({ id: e.id, kind: "edge-label", box: e.labelBox });
+  }
+  const labelCollisions = [];
+  for (let a = 0; a < owners.length; a++) {
+    for (let b = a + 1; b < owners.length; b++) {
+      const p = owners[a].box, q = owners[b].box;
+      const ox = Math.min(p.x + p.w, q.x + q.w) - Math.max(p.x, q.x);
+      const oy = Math.min(p.y + p.h, q.y + q.h) - Math.max(p.y, q.y);
+      if (ox > 3 && oy > 3) labelCollisions.push({ a: { id: owners[a].id, kind: owners[a].kind }, b: { id: owners[b].id, kind: owners[b].kind } });
+    }
+  }
+  if (labelCollisions.length > 40) labelCollisions.length = 40;
+
   return {
     canvas,
     components,
     edges,
-    analysis: { crossings, overlapping, labelIssues, edgeOverlaps },
+    analysis: { crossings, overlapping, labelIssues, edgeOverlaps, edgeOverLabels, labelCollisions, zOrder },
     textMap,
     relations,
   };

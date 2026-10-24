@@ -82,3 +82,7 @@ printf '%s\n' \
 ```
 
 Expect `"ok": true` in the response for id 2.
+
+## Roadmap
+
+Two-plane strengthening plan grounded in the text-vs-visual research: [ROADMAP.md](ROADMAP.md)

@@ -10,7 +10,8 @@
 import { spawnFile } from '../../../mcp-server/lib.js';
 import { analyzeSvg } from '../../../mcp-server/lib/svgmap.js';
 import { resolve, dirname, isAbsolute } from 'node:path';
-import { readdirSync, statSync } from 'node:fs';
+import { readdirSync, statSync, readFileSync, unlinkSync } from 'node:fs';
+import { execFileSync } from 'node:child_process';
 
 const here = dirname(new URL(import.meta.url).pathname);
 const root = resolve(here, '../../..');
@@ -48,14 +49,35 @@ for (const f of files) {
   const isMultiboard = /^(layers|scenarios|steps):/m.test(src);
   if (isMultiboard) { console.log('SKIP ' + rel + ' — multiboard (stdout render unsupported; covered by CI render step)'); continue; }
   const r = await spawnFile({ source: src, cwd: dirname(f), stdout: true });
-  if (!r.ok) { console.log('FAIL ' + rel + ' — render failed: ' + (r.stderr || '').trim().slice(0, 200)); bad++; continue; }
-  const m = analyzeSvg(r.stdout);
+  let svg = r.stdout;
+  if (!r.ok) {
+    // spawnFile's temp input lives in a hidden subdir of cwd, so relative
+    // imports (model-views/view-*.d2 → model.d2) cannot resolve there. Retry
+    // by rendering the real file path, where imports resolve naturally.
+    try {
+      const exe = process.env.D2_PATH || 'd2';
+      const outTmp = f + '.gate.svg';
+      execFileSync(exe, [f, outTmp], { stdio: 'pipe' });
+      svg = readFileSync(outTmp, 'utf8');
+      unlinkSync(outTmp);
+    } catch {
+      console.log('FAIL ' + rel + ' — render failed: ' + (r.stderr || '').trim().slice(0, 200));
+      bad++;
+      continue;
+    }
+  }
+  const m = analyzeSvg(svg);
   const a = m.canvas.aspect;
   const problems = [];
   if (a > 2.5 || a < 0.4) problems.push('aspect ' + a.toFixed(2) + ' outside 0.4..2.5');
   const slices = (m.analysis.edgeOverlaps || []).length;
   if (slices > 0 && !isSequence) problems.push(slices + ' edge-over-shape slice(s): ' + m.analysis.edgeOverlaps.slice(0, 3).map((o) => o.edge + ' through ' + o.shape).join('; '));
+  const labelSlices = (m.analysis.edgeOverLabels || []).length;
+  if (labelSlices > 0 && !isSequence) problems.push(labelSlices + ' edge-over-label slice(s): ' + m.analysis.edgeOverLabels.slice(0, 3).map((o) => o.edge + ' over ' + o.labelOf).join('; '));
   let note = m.analysis.crossings.length ? ' [' + m.analysis.crossings.length + ' crossings]' : '';
+  const labColl = (m.analysis.labelCollisions || []).length;
+  if (labColl) note += ' [' + labColl + ' label collision(s)]';
+  if (m.analysis.zOrder && m.analysis.zOrder.edgesPaintOverShapes === false && !isSequence) note += ' [edges painted under shapes]';
   if (isSequence && slices) note += ' [sequence: ' + slices + ' lifeline/band traversals exempt]';
   if (problems.length) { console.log('FAIL ' + rel + ' — ' + problems.join('; ') + note); bad++; }
   else console.log('PASS ' + rel + ' — ' + m.canvas.width + 'x' + m.canvas.height + ' a=' + a.toFixed(2) + note);
