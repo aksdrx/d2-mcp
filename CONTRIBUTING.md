@@ -8,7 +8,7 @@ to humans applies to AI contributors too (`AGENTS.md` is the full contract).
 For every diagram you add or edit:
 
 ```sh
-d2 fmt --write <file>.d2      # canonical formatting (CI checks it)
+d2 fmt <file>.d2      # canonical formatting (CI checks it)
 d2 validate <file>.d2         # must exit 0
 d2 <file>.d2 <file>.svg       # commit the render next to the source
 ```

@@ -1,6 +1,6 @@
 # D2 Diagrams — Agent & Skill Package
 
-[![CI](https://github.com/OWNER/d2-diagrams/actions/workflows/ci.yml/badge.svg)](https://github.com/OWNER/d2-diagrams/actions/workflows/ci.yml)
+[![CI](https://github.com/aksdrx/d2-mcp/actions/workflows/ci.yml/badge.svg)](https://github.com/aksdrx/d2-mcp/actions/workflows/ci.yml)
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
 [![d2](https://img.shields.io/badge/d2-v0.9.0-7C4DFF.svg)](https://d2lang.com)
 

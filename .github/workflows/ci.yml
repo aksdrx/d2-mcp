@@ -30,8 +30,8 @@ jobs:
         run: |
           mkdir -p /tmp/ci-fmt && status=0
           while IFS= read -r f; do
-            cp "$f" /tmp/ci-fmt/t.d2 && d2 fmt --write /tmp/ci-fmt/t.d2 >/dev/null 2>&1
-            diff -q /tmp/ci-fmt/t.d2 "$f" >/dev/null || { echo "NOT FORMATTED: $f (run: d2 fmt --write $f)"; status=1; }
+            cp "$f" /tmp/ci-fmt/t.d2 && d2 fmt /tmp/ci-fmt/t.d2 >/dev/null 2>&1
+            diff -q /tmp/ci-fmt/t.d2 "$f" >/dev/null || { echo "NOT FORMATTED: $f (run: d2 fmt $f)"; status=1; }
           done < <(find skills examples-md -name '*.d2' | sort)
           exit $status
       - name: Every .d2 validates
