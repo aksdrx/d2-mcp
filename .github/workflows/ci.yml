@@ -47,7 +47,7 @@ jobs:
           while IFS= read -r f; do
             d=$(dirname "$f"); b=$(basename "$f" .d2)
             ( cd "$d" && d2 "$b.d2" "$b.ci.svg" >/dev/null 2>&1 ) || { echo "RENDER FAIL: $f"; status=1; }
-            rm -f "$d/$b.ci.svg"
+            rm -rf "$d/$b.ci.svg"
           done < <(find skills examples-md -name '*.d2' | sort)
           exit $status
       - name: Visual-quality gate (aspect, edge-over-shape) on showcase examples
