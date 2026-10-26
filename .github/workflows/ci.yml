@@ -23,7 +23,7 @@ jobs:
         run: npm ci
       - name: JS syntax check
         run: |
-          for f in mcp-server/index.js mcp-server/lib.js mcp-server/lib/*.js mcp-server/smoke.mjs skills/d2-diagrams/scripts/comprehension.mjs; do
+          for f in mcp-server/index.js mcp-server/lib.js mcp-server/lib/*.js mcp-server/smoke.mjs skills/d2-diagrams/scripts/comprehension.mjs skills/d2-diagrams/scripts/pptx-fidelity.mjs audit/example-audit.mjs audit/run-audit.mjs; do
             node --check "$f"
           done
       - name: Every .d2 is canonically formatted
@@ -66,7 +66,10 @@ jobs:
       - name: Detector sensitivity regression (adversarial fixtures)
         run: node skills/d2-diagrams/scripts/sensitivity-check.mjs
 
+      - name: Full three-plane audit (G1-G6: source, pptx fidelity, pptx render)
+        run: node audit/run-audit.mjs
+
       - name: Markdown fence pipeline stays renderable (check-only)
         run: python3 skills/d2-diagrams/scripts/render_md.py --check-only examples-md/demo.md
-      - name: MCP server smoke test (10 tools)
+      - name: MCP server smoke test (14 tools)
         run: node mcp-server/smoke.mjs

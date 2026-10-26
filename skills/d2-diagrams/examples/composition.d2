@@ -6,6 +6,7 @@
 
 vars: {
   d2-config: {
+    layout-engine: dagre
     theme-id: 105
     pad: 40
   }
@@ -14,13 +15,18 @@ vars: {
 direction: down
 
 user: User {shape: person}
-lb: Load Balancer
-app: App Server {
-  link: layers.internals # click through to the detail board
+platform: {
+  grid-columns: 2
+  lb: Load Balancer
+  app: App Server {
+    link: layers.internals # click through to the detail board
+  }
 }
 db: PostgreSQL {shape: cylinder}
 
-user -> lb -> app -> db
+user -> lb: browse
+lb -> app: proxy
+app -> db: query
 
 layers: {
   internals: App Internals {

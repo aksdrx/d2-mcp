@@ -13,3 +13,10 @@ mcp-server/node_modules/
 
 # mcp smoke scratch dir
 .d2-smoke/
+
+# audit scratch (evidence dirs are reproducible from audit/run-audit.mjs)
+.pptx-fidelity/
+.audit-render*/
+
+# npm cache (local install scratch)
+.npm-cache/

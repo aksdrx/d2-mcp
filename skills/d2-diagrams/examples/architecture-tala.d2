@@ -47,7 +47,7 @@ stores: Datastores {
 }
 
 customer -> platform.gateway: place order
-platform.pipeline.charge -> stores.orders
+platform.pipeline.charge -> stores.orders: creates
 platform.pipeline.fulfill -> stores.events: publish
 
 note: |md

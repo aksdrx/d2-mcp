@@ -128,14 +128,33 @@ Requested directly by the user: render the SAME d2 diagrams as native PowerPoint
 shapes (not images), let the human rearrange elements in PowerPoint, then feed the
 edited deck back — text model via `d2_pptx_read` (relations JSON with positions,
 texts, head/tail connector refs; diff against the d2_pptx export manifest), vision
-model via a slide screenshot (`read_image`; LibreOffice unavailable, so PNG export
-from PowerPoint is the documented path).
+model via `d2_pptx_render` (v0.7.0: per-slide PNG rasterization, no LibreOffice
+needed — see addendum below).
 
 Implementation: `lib/pptx.js` (exportPptx: render + analyzeSvg + extract join, then
 pptxgenjs deck — preset geometries per d2 shape, containers painted largest-first,
-connectors as line shapes along the d2 waypoint routes with operator-correct
-arrowheads, edge labels at measured positions; readPptx: JSZip OOXML parse with a
+connectors as straight `line` shapes between measured endpoints with operator-
+correct arrowheads, edge labels at measured positions — waypoint routes are
+flattened to the endpoint segment (segment-accurate routes tracked as P4-A in
+`../../audit/TASKS.md`); readPptx: JSZip OOXML parse with a
 self-closing-aware element grabber). svgmap components now carry resolved `fill`/
 `stroke`. Smoke: 13 checks incl. the round-trip. Deps: pptxgenjs + jszip
 (npm --cache inside the workspace; default cache sits on a read-only mount).
+
+## P4 addendum — pptx render tool + three-plane audit — **SHIPPED** (`d2_pptx_render`; v0.7.0)
+
+Closes the P4 vision-model gap without LibreOffice: `renderPptxPng()` in
+`lib/pptx.js` rasterizes every slide of a .pptx via `@resvg/resvg.js` (single
+prebuilt-native dep, zero transitive) into `<stem>.slide<N>.png` — shapes,
+connectors, arrowheads, fills/strokes and text re-drawn as SVG then rasterized
+at `scale` (default 2). Also fixed en route: exportPptx leaked a `.pptx-in`
+scratch dir next to renders (now cleaned), and `extract.js` never APPLIED
+`(* -> *)[*]: suspend/unsuspend` glob rules — `applyGlobs()` now resolves them
+(matching d2 reveal semantics), so views report visibility truthfully.
+
+The whole kit is now audited in three planes (`audit/run-audit.mjs`, green in
+CI): source G1–G4, pptx fidelity G5 (export → read-back: labels, connector
+counts, ≤3px drift), pptx render G6 (every deck rasterizes to valid PNGs).
+Tracking: `audit/STATUS.md` / `TASKS.md` / `HISTORY.md` + `audit/runs/*.json`.
+Smoke: 14 checks incl. pptx round-trip + render.
 

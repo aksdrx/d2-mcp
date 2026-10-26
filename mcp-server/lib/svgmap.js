@@ -151,7 +151,7 @@ export function analyzeSvg(svgText, opts = {}) {
     if (m[0].startsWith("</g>")) {
       depth--;
       if (depth === 0 && start !== -1) {
-        topLevel.push(svgText.slice(start, m.index + m[0].length));
+        topLevel.push({ text: svgText.slice(start, m.index + m[0].length), start });
         start = -1;
       }
     } else {
@@ -160,7 +160,8 @@ export function analyzeSvg(svgText, opts = {}) {
     }
   }
   for (let ti = 0; ti < topLevel.length; ti++) {
-    const chunk = topLevel[ti];
+    const chunk = topLevel[ti].text;
+    const chunkStart = topLevel[ti].start;
     const cls = (chunk.match(/class="([^"]*)"/) || [])[1];
     if (!cls) continue;
     // Connections render as "K" + base64("(src OP dst)[i]") — test the stripped
@@ -223,13 +224,24 @@ export function analyzeSvg(svgText, opts = {}) {
     }
     if (!bbox) {
       let x0 = Infinity, y0 = Infinity, x1 = -Infinity, y1 = -Infinity;
+      const grow = (bx, by, bw, bh) => {
+        x0 = Math.min(x0, bx); y0 = Math.min(y0, by);
+        x1 = Math.max(x1, bx + bw); y1 = Math.max(y1, by + bh);
+      };
       for (const p of pathTags) {
         const dm = p.match(/ d="([^"]*)"/);
         if (!dm) continue;
         const { bbox: b } = parsePathD(dm[1]);
         if (!b) continue;
-        x0 = Math.min(x0, b.x); y0 = Math.min(y0, b.y);
-        x1 = Math.max(x1, b.x + b.w); y1 = Math.max(y1, b.y + b.h);
+        grow(b.x, b.y, b.w, b.h);
+      }
+      // circles and ovals render as <circle>/<ellipse> (no rect, no path)
+      for (const ce of chunk.match(/<(circle|ellipse)\b[^>]*>/g) || []) {
+        const cx = Number(attrOf(ce, "cx"));
+        const cy = Number(attrOf(ce, "cy"));
+        const rx = Number(attrOf(ce, "rx") ?? attrOf(ce, "r") ?? 0);
+        const ry = Number(attrOf(ce, "ry") ?? attrOf(ce, "r") ?? 0);
+        if (!isNaN(cx) && !isNaN(rx)) grow(cx - rx, cy - (isNaN(ry) ? rx : ry), rx * 2, (isNaN(ry) ? rx : ry) * 2);
       }
       if (x0 !== Infinity) bbox = { x: x0, y: y0, w: x1 - x0, h: y1 - y0 };
     }
@@ -241,8 +253,16 @@ export function analyzeSvg(svgText, opts = {}) {
       cx: Math.round(bbox.x + bbox.w / 2), cy: Math.round(bbox.y + bbox.h / 2),
       container: null,
     };
-    if (textTag) {
-      const t = parseTextEl(chunk);
+    let lblChunk = chunk;
+    if (!textTag) {
+      // person/circle/oval/diamond labels render AFTER the closing </g> —
+      // take the first <text> element that follows this component's group
+      const after = svgText.slice(chunkStart + chunk.length, chunkStart + chunk.length + 400);
+      const tm = after.match(/<text[\s\S]*?<\/text>/);
+      if (tm) lblChunk = tm[0];
+    }
+    if (textTag || lblChunk !== chunk) {
+      const t = parseTextEl(lblChunk);
       c.label = t
         ? { x: t.x, y: t.y, text: t.text, fs: t.fs, middle: t.middle, box: labelBoxOf(t) }
         : { x: attrOf(textTag[0], "x"), y: attrOf(textTag[0], "y") };

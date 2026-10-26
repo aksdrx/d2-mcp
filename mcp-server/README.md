@@ -22,6 +22,7 @@ without even needing the d2 binary.
 | `d2_themes` | list theme IDs on this machine |
 | `d2_pptx` | export the diagram as a NATIVE-shape .pptx (movable PowerPoint shapes + arrow connectors + text, not an embedded image); returns the export manifest for later diffing |
 | `d2_pptx_read` | parse a .pptx back into a relations JSON (shapes/positions/texts/connectors) — ingest human edits made in PowerPoint |
+| `d2_pptx_render` | rasterize a .pptx to one PNG per slide (resvg, no LibreOffice needed) — feed decks directly to a vision model |
 | `d2_version` | d2 CLI version string |
 
 The dual-plane contract (`d2_extract` / sidecar JSON schema) is documented in

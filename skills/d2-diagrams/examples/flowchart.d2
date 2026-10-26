@@ -25,7 +25,7 @@ rollback: Automatic rollback {
 }
 done: Deploy complete {shape: oval; style.fill: "#E8F5E9"}
 
-start -> checks
+start -> checks: submit
 checks -> green: done
 green -> canary: yes
 green -> start: "no — fix and resubmit" {style.stroke-dash: 3}

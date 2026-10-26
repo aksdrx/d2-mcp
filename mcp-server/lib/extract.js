@@ -740,6 +740,52 @@ function computeMetrics(objects, connections) {
   return { objects: objects.length, connections: connections.length, maxDegree, hubs };
 }
 
+/**
+ * Apply glob suspend/unsuspend rules in source order (d2 visibility semantics).
+ * Object globs match ids across objects AND connections ("**" crosses dots,
+ * "*" stays within one segment); connection globs match the "(src -> dst)[n]"
+ * form with optional &label/&src/&dst filter children. Un-suspending an edge
+ * also reveals its endpoints (and their containers), mirroring d2's reveal
+ * behavior — without this, views built from "**: suspend" +
+ * "(** -> **)[*]: unsuspend" misreport every hidden element as visible.
+ */
+function applyGlobs(model) {
+  if (!model.globs || !model.globs.length || !model.objects) return;
+  const esc = (s) => s.replace(/[.+?^$\{}()|[\]\\]/g, "\\$&");
+  const globRe = (pat) => new RegExp("^" + String(pat).split("**").map((p) => p.split("*").map(esc).join("[^.]*")).join(".*") + "$", "i");
+  const matches = (pat, s) => { try { return globRe(pat).test(s); } catch { return false; } };
+  const byId = new Map(model.objects.map((o) => [o.id, o]));
+  const reveal = (id) => { let cur = id; while (cur) { const o = byId.get(cur); if (!o) break; o.suspended = false; cur = o.container; } };
+  for (const g of model.globs) {
+    const pat = g.pattern || "";
+    const suspend = g.value === "suspend" ? true : g.value === "unsuspend" ? false : null;
+    if (suspend === null) continue;
+    const raw = g.filters || {};
+    const filters = {};
+    for (const k of Object.keys(raw)) filters[k.replace(/^&/, "")] = raw[k]; // "&label" -> "label"
+    const labelOk = (c) => !filters.label || matches(filters.label, String(c.label || ""));
+    const srcOk = (c) => !filters.src || matches(filters.src, c.src || "");
+    const dstOk = (c) => !filters.dst || matches(filters.dst, c.dst || "");
+    const idx = pat.indexOf(" -> ");
+    if (idx > 0 && /\[\*?\d*\]\s*$/.test(pat)) {
+      // connection form "(srcPat -> dstPat)[n]"
+      const srcPat = pat.slice(0, idx).replace(/^[({[]+/, "").trim();
+      const dstPat = pat.slice(idx + 4).replace(/\s*[}\])]+\s*\[\*?\d*\]\s*$/, "").trim();
+      for (const c of model.connections || [])
+        if (matches(srcPat, c.src || "") && matches(dstPat, c.dst || "") && labelOk(c) && srcOk(c) && dstOk(c)) c.suspended = suspend;
+    } else {
+      for (const o of model.objects) if (matches(pat, o.id)) o.suspended = suspend;
+      for (const c of model.connections || []) if (matches(pat, c.id || "")) c.suspended = suspend;
+    }
+  }
+  // d2 reveals the endpoints (and their containers) of re-shown edges
+  for (const c of model.connections || []) {
+    if (c.suspended) continue;
+    if (c.src) reveal(c.src);
+    if (c.dst) reveal(c.dst);
+  }
+}
+
 // ------------------------------------------------- public API
 
 /**
@@ -770,6 +816,7 @@ export function extract(source, opts = {}) {
   result.blockStrings = blocks.map((b) => ({ key: b.key.replace(/:\s*$/, ""), content: b.content, line: b.line }));
   result.warnings = warnings.concat(model.warnings);
   if (opts.resolveDir) resolveImports(result, opts.resolveDir, new Set());
+  applyGlobs(result);
   result.metrics = computeMetrics(result.objects, result.connections);
   if (opts.board && model.boards[opts.board]) {
     const b = model.boards[opts.board];

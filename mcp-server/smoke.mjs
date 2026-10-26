@@ -103,6 +103,12 @@ try {
   const moved = px2.ok && px2.shapes.length >= 2 && px2.shapes.every((s) => s.x !== null && s.y !== null && s.w !== null);
   check('pptx_roundtrip', px1.ok === true && px1.shapes >= 2 && px2.ok === true && moved,
     px1.ok ? px1.shapes + ' shapes, read ' + (px2.shapes || []).length : (px1.error || '').slice(0, 60));
+  // 7c. d2_pptx_render: pptx -> PNG per slide (vision feed)
+  const pxr = JSON.parse(text(await call('d2_pptx_render', { pptxPath: tmp + '/rt.pptx', outDir: tmp, scale: 2 })));
+  const pngOk = pxr.ok === true && pxr.slides.length === 1;
+  const pngBytes = pngOk ? readFileSync(pxr.slides[0].file) : Buffer.alloc(0);
+  check('pptx_render', pngOk && pngBytes.length > 1000 && pngBytes[1] === 0x50 && pngBytes[2] === 0x4e,
+    pxr.ok ? pxr.slides[0].width + 'x' + pxr.slides[0].height + ' png ' + pngBytes.length + 'B' : (pxr.error || '').slice(0, 60));
   // 8. layouts / themes / version
   const layTxt = text(await call('d2_layouts', {}));
   check('layouts', layTxt.includes('dagre') && layTxt.includes('tala'), layTxt.slice(0, 60));
@@ -114,6 +120,6 @@ try {
   rmSync(tmp, { recursive: true, force: true });
 }
 
-console.log(fail ? 'SMOKE FAILURES: ' + fail : 'SMOKE ALL GREEN (13 checks incl. pptx round-trip)');
+console.log(fail ? 'SMOKE FAILURES: ' + fail : 'SMOKE ALL GREEN (14 checks incl. pptx round-trip + render)');
 p.kill();
 process.exit(fail ? 1 : 0);

@@ -22,7 +22,7 @@ import path from "node:path";
 import { spawnFile, parseDiagnostics, svgDims } from "./lib.js";
 import { analyzeSvg } from "./lib/svgmap.js";
 import { extract, toText } from "./lib/extract.js";
-import { exportPptx, readPptx } from "./lib/pptx.js";
+import { exportPptx, readPptx, renderPptxPng } from "./lib/pptx.js";
 import { renderMarkdown } from "./lib/mdrender.js";
 
 const server = new McpServer({
@@ -786,6 +786,32 @@ server.registerTool(
   },
   async (input) => {
     const r = await readPptx(path.resolve(input.pptxPath));
+    if (!r.ok) return { ...json(r), isError: true };
+    return json(r);
+  }
+);
+// ------------------------------------------------------------ d2_pptx_render (P4 vision feed)
+server.registerTool(
+  "d2_pptx_render",
+  {
+    title: "Render a .pptx as PNG images (vision model feed)",
+    description:
+      "Rasterizes every slide of a .pptx (one PNG per slide) so a native vision model " +
+      "can read the deck directly - no PowerPoint or LibreOffice needed. Maps OOXML " +
+      "shapes to SVG (preset geometries, text runs, connector lines + arrowheads) and " +
+      "rasterizes with resvg. Use after d2_pptx export or on human-edited decks to " +
+      "visually verify or diff what PowerPoint shows.",
+    inputSchema: {
+      pptxPath: z.string().describe("Path to the .pptx file"),
+      outDir: z.string().optional().describe("Directory for the PNGs (default: next to the .pptx)"),
+      scale: z.number().positive().optional().describe("Raster scale (default 2 = 2x slide px at 96dpi)"),
+    },
+  },
+  async (input) => {
+    const r = await renderPptxPng(path.resolve(input.pptxPath), {
+      outDir: input.outDir ? path.resolve(input.outDir) : undefined,
+      scale: input.scale,
+    });
     if (!r.ok) return { ...json(r), isError: true };
     return json(r);
   }
