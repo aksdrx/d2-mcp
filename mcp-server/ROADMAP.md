@@ -66,3 +66,59 @@ Every defect found by any channel — human review, visual model, gate, agent �
 (a) an adversarial fixture, (b) a detector if missing, (c) a gate rule if critical.
 That loop already shipped five capabilities (edgeOverlaps, edgeOverLabels, labelCollisions,
 zOrder, the gate) and fixed three showcase diagrams; this roadmap is its continuation.
+
+## P3 — vision-native support + formalized ruleset (planned)
+
+Grounded in the first visual regression pass: vision reached 97% PARITY; its
+remaining losses are (a) a semantic gap (sequence crossings metric), (b) counting
+tasks over dense geometry, (c) small or overprinted text requiring harness
+downscaling, (d) degree ties. Vision strengths (glyphs, color, gestalt) still find
+things detectors model late. P3 makes the MCP serve BOTH channels deliberately.
+
+### New capabilities (tools)
+
+1. `d2_focus` - component/region crop render. Render one component bbox (plus
+   neighborhood margin) at native or 2x scale as PNG, so vision models read small or
+   overprinted text at native resolution instead of fighting harness downscaling
+   (the experiment needed 4-6x zoom crops by hand).
+2. `d2_annotate` - findings-overlay render. Re-render with red boxes on
+   `edgeOverlaps`, `edgeOverLabels` and `labelCollisions` hits so a vision model can
+   verify detector findings at a glance (detector-vision alignment loop).
+3. `d2_manifest` - expected-inventory for perception self-check. From the source
+   alone (no render): object inventory {id, label, shape, classes}, edge count, kind,
+   glyph list. A vision model views the diagram, then diffs what it saw against the
+   manifest - counting errors become verification errors with ground truth.
+4. Vision render profile - `renderProfile: vision` preset on render/focus: scale 2,
+   high-contrast theme, minimum font-size, no decorative fills - pixels optimized
+   for vision encoders rather than humans.
+
+### Formalizing best practices (rules as data)
+
+5. Machine-readable ruleset `skills/d2-diagrams/ruleset.json`: every rule as
+   {id, plane: visual|text|both, level: prose|warning|gate|assertion, params}. R1-R6
+   and the V-rules below become DATA that the gate, sensitivity checks and docs all
+   read; prose cites rule ids instead of duplicating thresholds.
+6. Vision rules (V-series): V1 label min px-height at default scale; V2 contrast
+   floor (theme + fill pairs); V3 density cap (components per canvas area); V4 no
+   color-alone semantics (every class differs by shape or dash too); V5 label length
+   cap; V6 max crossings per hub. Each: level + params + detector or manual note.
+7. Sequence-crossings wording fix: battery/gate wording becomes kind-aware
+   (message arrows crossing each other) - eliminates the semantic gap the visual
+   regression hit.
+
+### Protocol for vision-native agents
+
+8. reference/vision-protocols.md - the vision counterpart of the Agent verification
+   loop: manifest first, then full view, then `d2_focus` crops for anything
+   uncertain, then `d2_assert` to verify claims, then `d2_annotate` to double-check
+   detector findings. Plus authoring guidance for vision legibility (V-rules).
+9. Battery extension: vision-only question types (glyph identification, color-class
+   mapping, density estimation) so the regression tracks vision capabilities
+   independently of text-shaped questions.
+
+### Priority
+
+P3-a (fast, high value): ruleset.json + V-rule wiring into the gate (5, 6) and the
+sequence wording fix (7). P3-b: d2_manifest + vision protocol doc (3, 8). P3-c:
+d2_focus + d2_annotate + vision render profile (1, 2, 4) + battery extension (9).
+
