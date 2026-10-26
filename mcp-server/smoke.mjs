@@ -79,6 +79,24 @@ try {
     && lm.kind === 'flow' && lm.labels && lm.labels['the alpha'] === 'alpha',
     lm.components ? lm.components.length + ' components, kind=' + lm.kind + ', labels=' + Object.keys(lm.labels || {}).length : 'none');
 
+  // 8a. d2_assert: intent predicates (P1)
+  const asr = JSON.parse(text(await call('d2_assert', { source: 'alpha: The Alpha\nalpha -> b: edge one\nc -> d', assertions: [
+    { type: 'aspect', min: 0.3, max: 3 },
+    { type: 'crossings', max: 1 },
+    { type: 'hub-degree', max: 3 },
+    { type: 'label-exists', text: 'edge one' },
+  ] })));
+  const asr2 = JSON.parse(text(await call('d2_assert', { filePath: 'skills/d2-diagrams/examples/comprehension/containers.d2', assertions: [
+    { type: 'left-of', a: 'dns', b: 'cdn' },
+    { type: 'inside', a: 'vpc.api.gateway', b: 'vpc' },
+  ] })));
+  check('assert', asr.ok === true && asr.results.length === 4 && asr.results.every((x) => x.pass) && asr2.ok === true && asr2.results.every((x) => x.pass),
+    asr.failures + '+' + asr2.failures + ' failed');
+
+  // 8b. d2_visual_check: one-call gate (P1)
+  const vc = JSON.parse(text(await call('d2_visual_check', { source: 'a -> b -> c' })));
+  check('visual_check', vc.ok === true && vc.checks.length === 3 && vc.canvas.aspect > 0,
+    vc.kind + ' a=' + (vc.canvas && vc.canvas.aspect));
   // 8. layouts / themes / version
   const layTxt = text(await call('d2_layouts', {}));
   check('layouts', layTxt.includes('dagre') && layTxt.includes('tala'), layTxt.slice(0, 60));
@@ -90,6 +108,6 @@ try {
   rmSync(tmp, { recursive: true, force: true });
 }
 
-console.log(fail ? 'SMOKE FAILURES: ' + fail : 'SMOKE ALL GREEN (10 tools)');
+console.log(fail ? 'SMOKE FAILURES: ' + fail : 'SMOKE ALL GREEN (12 checks, 10 tools + assert + visual_check)');
 p.kill();
 process.exit(fail ? 1 : 0);

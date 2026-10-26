@@ -418,20 +418,39 @@ server.registerTool(
         continue;
       }
       const dims = svgDims(p.path) || {};
-      let crossings;
+      let crossings, slices, labelSlices, kind;
       try {
-        crossings = analyzeSvg(fs.readFileSync(p.path, "utf8")).analysis.crossings.length;
+        const m = analyzeSvg(fs.readFileSync(p.path, "utf8"));
+        crossings = m.analysis.crossings.length;
+        // P1-10: slices and label slices are worse than crossings (an arrow
+        // through a box or over text beats any number of clean crossings).
+        slices = (m.analysis.edgeOverlaps || []).length;
+        labelSlices = (m.analysis.edgeOverLabels || []).length;
+        kind = m.kind;
       } catch {
         /* geometry optional */
       }
-      variants.push({ tag: p.tag, path: p.path, ...dims, ...(crossings !== undefined ? { crossings } : {}) });
+      variants.push({
+        tag: p.tag,
+        path: p.path,
+        ...dims,
+        ...(kind ? { kind } : {}),
+        ...(crossings !== undefined ? { crossings } : {}),
+        ...(slices !== undefined ? { slices } : {}),
+        ...(labelSlices !== undefined ? { labelSlices } : {}),
+      });
     }
-    // Data-driven winner for the bake-off: fewest crossings, then aspect closest
-    // to 1.6 (inside the 3:2-16:9 band). Lets text-only agents pick without eyes.
+    // Data-driven winner for the bake-off: fewest edge slices, then label
+    // slices, then fewest crossings, then aspect closest to 1.6 (inside the
+    // 3:2-16:9 band). Lets text-only agents pick without eyes.
     let recommended = null;
     if (variants.length > 1) {
       const scored = [...variants].sort(
-        (a, b) => (a.crossings ?? 99) - (b.crossings ?? 99) || Math.abs((a.aspect ?? 9) - 1.6) - Math.abs((b.aspect ?? 9) - 1.6)
+        (a, b) =>
+          (a.slices ?? 99) - (b.slices ?? 99) ||
+          (a.labelSlices ?? 99) - (b.labelSlices ?? 99) ||
+          (a.crossings ?? 99) - (b.crossings ?? 99) ||
+          Math.abs((a.aspect ?? 9) - 1.6) - Math.abs((b.aspect ?? 9) - 1.6)
       );
       recommended = scored[0].tag;
     }
@@ -535,6 +554,182 @@ server.registerTool(
   }
 );
 
+// ------------------------------------------------------------ d2_assert (P1)
+// Intent predicates verified against measured geometry: state what the diagram
+// SHOULD express; the tool renders, measures, and checks each claim. Closes the
+// agent loop: intent -> render -> verify (the visual gate enforces the floor).
+server.registerTool(
+  "d2_assert",
+  {
+    title: "Assert diagram intent against measured geometry",
+    description:
+      "Renders the diagram (honoring its pinned config or layout/direction/theme overrides), " +
+      "measures it, and evaluates each assertion: left-of/above (position predicates, " +
+      "tie-aware), inside (container chain), no-slices (no arrow crosses a shape it is not " +
+      "connected to), aspect range, crossings<=N, hub-degree<=N, label-exists. Returns one " +
+      "result per assertion with the measured value — use it to verify intent before " +
+      "claiming a diagram done.",
+    inputSchema: {
+      ...sourceOrFile,
+      layout: layoutEnum.optional().describe("Layout engine to measure with (default: the file's own config)"),
+      direction: z.enum(["down", "up", "right", "left"]).optional().describe("Direction override to measure with"),
+      theme: z.number().int().optional().describe("Theme id (fonts slightly change geometry)"),
+      assertions: z
+        .array(
+          z.union([
+            z.object({ type: z.literal("left-of"), a: z.string(), b: z.string() }),
+            z.object({ type: z.literal("above"), a: z.string(), b: z.string() }),
+            z.object({ type: z.literal("inside"), a: z.string(), b: z.string() }),
+            z.object({ type: z.literal("no-slices") }),
+            z.object({ type: z.literal("aspect"), min: z.number().optional(), max: z.number().optional() }),
+            z.object({ type: z.literal("crossings"), max: z.number() }),
+            z.object({ type: z.literal("hub-degree"), max: z.number() }),
+            z.object({ type: z.literal("label-exists"), text: z.string(), exact: z.boolean().optional() }),
+          ])
+        )
+        .min(1)
+        .describe("Assertions to evaluate against the rendered geometry"),
+    },
+  },
+  async (input) => {
+    let base;
+    try {
+      base = baseSource(input);
+    } catch (e) {
+      return { ...json({ ok: false, error: String(e.message) }), isError: true };
+    }
+    const args = [];
+    if (input.layout) args.push("--layout=" + input.layout);
+    if (input.theme !== undefined) args.push("--theme=" + input.theme);
+    const res = await spawnFile({ source: base.withDir(input.direction), args, cwd: base.baseDir, stdout: true });
+    if (!res.ok || !res.stdout) {
+      return { ...json({ ok: false, error: (res.stderr || res.stdout || "").trim(), errors: parseDiagnostics(res.stderr || "") }), isError: true };
+    }
+    const map = analyzeSvg(res.stdout);
+    let model = null;
+    try { model = extract(base.sourceText, { resolveDir: base.baseDir }); } catch {}
+    const compById = new Map(map.components.map((c) => [c.id, c]));
+    const results = [];
+    for (const a of input.assertions) {
+      const out = { type: a.type, pass: false, measured: null };
+      if (a.type === "left-of" || a.type === "above") {
+        const rel = a.type;
+        const hit = map.relations.find((r) => r.rel === rel && r.b === a.b && (r.a === a.a || (r.tiedWith || []).includes(a.a)));
+        // also accept the mirrored pair (b left-of a means a right-of b, not a match)
+        out.pass = !!hit;
+        const cand = map.relations.filter((r) => r.rel === rel && r.b === a.b);
+        out.measured = cand.length ? cand.map((r) => r.a).join(", ") : "no " + rel + " relations for " + a.b;
+      } else if (a.type === "inside") {
+        const chain = [];
+        let cur = compById.get(a.a);
+        while (cur && cur.container) { chain.push(cur.container); cur = compById.get(cur.container); }
+        out.pass = chain.includes(a.b);
+        out.measured = chain.length ? chain.join(" > ") : "root";
+      } else if (a.type === "no-slices") {
+        const n = (map.analysis.edgeOverlaps || []).length;
+        out.pass = n === 0;
+        out.measured = n + " edge-over-shape slice(s)" + (map.kind === "sequence" ? " (sequence: lifeline/band traversals included)" : "");
+      } else if (a.type === "aspect") {
+        const asp = map.canvas.aspect;
+        out.pass = asp >= (a.min ?? -Infinity) && asp <= (a.max ?? Infinity);
+        out.measured = asp;
+      } else if (a.type === "crossings") {
+        const n = map.analysis.crossings.length;
+        out.pass = n <= a.max;
+        out.measured = n;
+      } else if (a.type === "hub-degree") {
+        const d = model && model.metrics ? model.metrics.maxDegree : null;
+        out.pass = d !== null && d <= a.max;
+        out.measured = d !== null ? d + " (hubs: " + ((model.metrics.hubs || []).map((h) => h.id ?? h).join(", ") || "none") + ")" : "extract unavailable";
+      } else if (a.type === "label-exists") {
+        const labels = [];
+        if (model) {
+          for (const o of model.objects) if (typeof o.label === "string") labels.push({ owner: o.id, label: o.label });
+          for (const c of model.connections) if (c.label) labels.push({ owner: c.src + " -> " + c.dst, label: c.label });
+        }
+        const hit = labels.find((l) => (a.exact ? l.label === a.text : l.label.toLowerCase().includes(a.text.toLowerCase())));
+        out.pass = !!hit;
+        out.measured = hit ? "'" + hit.label + "' on " + hit.owner : labels.length + " label(s) searched, none matched";
+      }
+      results.push(out);
+    }
+    const failed = results.filter((r) => !r.pass).length;
+    return json({
+      ok: failed === 0,
+      kind: map.kind,
+      canvas: { width: map.canvas.width, height: map.canvas.height, aspect: map.canvas.aspect },
+      results,
+      failures: failed,
+      hint: failed === 0 ? "all assertions hold on the measured render" : "fix layout (direction, grid, hub width/height, split views) until every assertion holds; re-run to verify",
+    });
+  }
+);
+
+// ------------------------------------------------------------ d2_visual_check (P1)
+// The CI visual gate as one MCP call: agents self-check before claiming done.
+server.registerTool(
+  "d2_visual_check",
+  {
+    title: "Visual-quality floor check for one diagram",
+    description:
+      "Renders the diagram and evaluates the same floor CI enforces: aspect within " +
+      "[aspectMin, aspectMax] (default 0.4..2.5), zero edge-over-shape slices, zero " +
+      "edge-over-label slices (sequence diagrams are exempt from both slice checks - " +
+      "lifelines legitimately traverse groups). Label collisions and crossings are " +
+      "reported as informational findings. Returns pass/fail per check with measured values.",
+    inputSchema: {
+      ...sourceOrFile,
+      layout: layoutEnum.optional().describe("Layout engine to measure with (default: the file's own config)"),
+      direction: z.enum(["down", "up", "right", "left"]).optional().describe("Direction override to measure with"),
+      theme: z.number().int().optional().describe("Theme id (fonts slightly change geometry)"),
+      aspectMin: z.number().optional().describe("aspect lower bound (default 0.4)"),
+      aspectMax: z.number().optional().describe("aspect upper bound (default 2.5)"),
+    },
+  },
+  async (input) => {
+    let base;
+    try {
+      base = baseSource(input);
+    } catch (e) {
+      return { ...json({ ok: false, error: String(e.message) }), isError: true };
+    }
+    const args = [];
+    if (input.layout) args.push("--layout=" + input.layout);
+    if (input.theme !== undefined) args.push("--theme=" + input.theme);
+    const res = await spawnFile({ source: base.withDir(input.direction), args, cwd: base.baseDir, stdout: true });
+    if (!res.ok || !res.stdout) {
+      return { ...json({ ok: false, error: (res.stderr || res.stdout || "").trim(), errors: parseDiagnostics(res.stderr || "") }), isError: true };
+    }
+    const m = analyzeSvg(res.stdout);
+    const isSeq = m.kind === "sequence";
+    const a = m.canvas.aspect;
+    const aMin = input.aspectMin ?? 0.4;
+    const aMax = input.aspectMax ?? 2.5;
+    const slices = (m.analysis.edgeOverlaps || []).length;
+    const labelSlices = (m.analysis.edgeOverLabels || []).length;
+    const checks = [
+      { check: "aspect", pass: a >= aMin && a <= aMax, measured: a, expect: aMin + ".." + aMax },
+      { check: "no-edge-slices", pass: isSeq || slices === 0, measured: slices + (isSeq ? " (sequence exempt)" : ""), expect: "0" },
+      { check: "no-edge-over-label", pass: isSeq || labelSlices === 0, measured: labelSlices + (isSeq ? " (sequence exempt)" : ""), expect: "0" },
+    ];
+    const failed = checks.filter((c) => !c.pass).length;
+    return json({
+      ok: failed === 0,
+      kind: m.kind,
+      canvas: { width: m.canvas.width, height: m.canvas.height, aspect: a },
+      checks,
+      findings: {
+        edgeOverlaps: (m.analysis.edgeOverlaps || []).slice(0, 8),
+        edgeOverLabels: (m.analysis.edgeOverLabels || []).slice(0, 8),
+        labelCollisions: (m.analysis.labelCollisions || []).slice(0, 8),
+        crossings: m.analysis.crossings.length,
+      },
+      hint: failed === 0
+        ? 'meets the visual floor; proceed to the style pass (monochrome check, theme 1)'
+        : 'fix geometry first: direction/root-grid for aspect, hub width/height or split views for slices; re-run until green',
+    });
+  },
+);
 // ------------------------------------------------------------ d2_version
 server.registerTool(
   "d2_version",

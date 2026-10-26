@@ -24,6 +24,7 @@ import path from "node:path";
 import crypto from "node:crypto";
 
 import { extract, toText } from "./extract.js";
+import { analyzeSvg } from "./svgmap.js";
 
 // ---------------------------------------------------------------- helpers
 
@@ -167,13 +168,14 @@ export function renderMarkdown(mdPath, opts) {
     const format = fenceOpts.format || opts.format;
 
     // text plane always available (no binary needed)
+    const model = opts.sidecars || opts.checkOnly ? extract(block.body) : null;
     if (opts.sidecars) {
       fs.mkdirSync(outDir, { recursive: true });
-      const model = extract(block.body);
       fs.writeFileSync(
         path.join(outDir, name + ".txt"),
         toText(model) + "\n",
       );
+      // v1 text-only sidecar; upgraded with geometry after a successful render
       fs.writeFileSync(
         path.join(outDir, name + ".relations.json"),
         JSON.stringify(model, null, 2) + "\n",
@@ -181,8 +183,7 @@ export function renderMarkdown(mdPath, opts) {
     }
 
     if (opts.checkOnly) {
-      const model = extract(block.body);
-      if (model.warnings && model.warnings.length) {
+      if (model && model.warnings && model.warnings.length) {
         errors.push(`${mdPath} block ${idx + 1}: ${model.warnings.join("; ")}`);
       }
       continue;
@@ -210,6 +211,45 @@ export function renderMarkdown(mdPath, opts) {
     }
     rendered++;
     manifest[mdPath + "#" + name] = srcHash;
+
+    // sidecar v2: join the measured geometry into the relations model so both
+    // planes + the label->id join travel in ONE artifact per diagram
+    if (opts.sidecars && model && format === "svg") {
+      try {
+        const svgText = fs.readFileSync(outPath, "utf8");
+        const map = analyzeSvg(svgText);
+        const byId = new Map(map.components.map((c) => [c.id, c]));
+        const objects = (model.objects || []).map((o) => {
+          const g = byId.get(o.id);
+          return g
+            ? { ...o, bbox: [g.x, g.y, g.w, g.h], center: [g.cx, g.cy] }
+            : { ...o };
+        });
+        const geoEdges = new Map();
+        for (const e of map.edges || []) geoEdges.set(e.src + "\u0000" + e.dst, e);
+        const connections = (model.connections || []).map((c) => {
+          const e = geoEdges.get(c.src + "\u0000" + c.dst);
+          return e ? { ...c, ...(e.index !== undefined ? { index: e.index } : {}), route: e.waypoints } : { ...c };
+        });
+        const v2 = {
+          schema: "d2-relations-v2",
+          ...model,
+          kind: map.kind,
+          canvas: map.canvas,
+          objects,
+          connections,
+          analysis: {
+            crossings: (map.analysis.crossings || []).length,
+            edgeOverlaps: (map.analysis.edgeOverlaps || []).slice(0, 20),
+            edgeOverLabels: (map.analysis.edgeOverLabels || []).slice(0, 20),
+            labelCollisions: (map.analysis.labelCollisions || []).slice(0, 20),
+          },
+        };
+        fs.writeFileSync(path.join(outDir, name + ".relations.json"), JSON.stringify(v2, null, 2) + "\n");
+      } catch {
+        /* keep the v1 sidecar if geometry analysis fails */
+      }
+    }
     const linkPath = path.isAbsolute(relDir)
       ? path.relative(path.dirname(path.resolve(mdPath)), outPath)
       : `${relDir}/${name}.${format}`;

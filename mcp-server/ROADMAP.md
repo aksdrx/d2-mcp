@@ -39,17 +39,17 @@ labels, glyphs and colors are views over it.
    layoutMap components, so agents read `cylinder + dashed` without pixels and conventions
    (solid=sync, dashed=async) become checkable.
 
-## P1 — robustness capabilities
+## P1 — robustness capabilities — **SHIPPED** (d2_assert + d2_visual_check tools; relations sidecar v2 with joined geometry; variant ranking by slices → labelSlices → crossings → aspect)
 
-7. **`d2_assert` tool** — intent predicates against measured geometry:
+7. ~~**`d2_assert` tool**~~ — intent predicates against measured geometry:
    `X left-of Y`, `no slices`, `aspect in 0.67..1.5`, `hub degree ≤ N` → pass/fail with measured
    values. Closes the agent loop: state intent → render → verify → gate.
-8. **`d2_visual_check` tool** — the visual-gate as one MCP call (PASS/FAIL + findings),
+8. ~~**`d2_visual_check` tool**~~ — the visual-gate as one MCP call (PASS/FAIL + findings),
    so any agent self-checks before claiming done; CI keeps the CLI version.
-9. **Sidecar v2** — one JSON per diagram carrying both planes + join keys:
+9. ~~**Sidecar v2**~~ — one JSON per diagram carrying both planes + join keys:
    objects `{id,label,bbox,shape,style,container}`, edges `{id,src,dst,label,route,overlaps,onTop}`;
    `d2_md_render --sidecars` adopts it as the dual-plane contract.
-10. **Bake-off upgrade** — `d2_variants` per-variant edgeOverlaps/edgeOverLabels counts;
+10. ~~**Bake-off upgrade**~~ — `d2_variants` per-variant edgeOverlaps/edgeOverLabels counts;
     recommendation order becomes (slices, crossings, |aspect−1.6|).
 
 ## P2 — human-plane polish
