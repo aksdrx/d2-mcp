@@ -21,21 +21,21 @@ channel could catch), **consistent** (both derived from the same source render),
 (intent can be asserted and machine-checked). The source id is the only stable join key;
 labels, glyphs and colors are views over it.
 
-## P0 — close the demonstrated gaps
+## P0 — close the demonstrated gaps — **SHIPPED** (layoutMap returns kind, labels, shape/classes, edge index, tiedWith; degenerate bboxes filtered; battery scores tied answers)
 
-1. **Label→id table in `d2_layout_map`** — add `labels: {label → id}` (and reverse).
+1. ~~**Label→id table**~~ in `d2_layout_map`** — add `labels: {label → id}` (and reverse).
    Kills the single largest vision failure class (4/7 original losses).
-2. **Tied relations** — when `left-of`/`above` candidates sit within ε, emit all of them
+2. ~~**Tied relations**~~ — when `left-of`/`above` candidates sit within ε, emit all of them
    (`tiedWith`); battery scorer accepts any tied answer. Evidence: dense `partner_b` (pricing vs inventory, 7px),
    cqrs staleness_window (6-way tie).
-3. **Degenerate-bbox filtering** — components with height/width ≤ 2px (titles) leave relation
+3. ~~**Degenerate-bbox filtering**~~ — components with height/width ≤ 2px (titles) leave relation
    derivation. Evidence: the `title left-of oncall` false positive that vision correctly rejected.
-4. **Diagram-kind tagging** — `layoutMap.kind: flow | sequence | multiboard` derived from
+4. ~~**Diagram-kind tagging**~~ — `layoutMap.kind: flow | sequence | multiboard` derived from
    boardAttrs + lifeline pseudo-edges (`(X -- )`); move the sequence exemptions out of gate
    regexes into machine-readable metadata; annotate crossings/aspect with kind semantics.
-5. **Parallel-edge indexing** — surface `[i]` in edge ids and battery edge-label questions
+5. ~~**Parallel-edge indexing**~~ — surface `[i]` in edge ids and battery edge-label questions
    (8a./8b. `fetch` ambiguity).
-6. **Glyph/style surfacing** — join extract's shape + style (shape kind, dashed, fill class) into
+6. ~~**Glyph/style surfacing**~~ — join extract's shape + style (shape kind, dashed, fill class) into
    layoutMap components, so agents read `cylinder + dashed` without pixels and conventions
    (solid=sync, dashed=async) become checkable.
 

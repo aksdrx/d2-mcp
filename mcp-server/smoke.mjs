@@ -74,9 +74,10 @@ try {
     (varr.variants || []).length + ' variants');
 
   // 7. d2_layout_map: geometry as text
-  const lm = JSON.parse(text(await call('d2_layout_map', { source: 'a -> b\nc -> d' })));
-  check('layout_map', lm.ok === true && lm.components && lm.components.length === 4 && Array.isArray(lm.relations),
-    lm.components ? lm.components.length + ' components' : 'none');
+  const lm = JSON.parse(text(await call('d2_layout_map', { source: 'alpha: The Alpha\nalpha -> b: edge one\nc -> d' })));
+  check('layout_map', lm.ok === true && lm.components && lm.components.length === 4 && Array.isArray(lm.relations)
+    && lm.kind === 'flow' && lm.labels && lm.labels['the alpha'] === 'alpha',
+    lm.components ? lm.components.length + ' components, kind=' + lm.kind + ', labels=' + Object.keys(lm.labels || {}).length : 'none');
 
   // 8. layouts / themes / version
   const layTxt = text(await call('d2_layouts', {}));

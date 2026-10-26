@@ -716,6 +716,7 @@ function boardToPOJO(m, opts) {
     globs: m.globs,
     imports: m.imports,
   };
+  if (m.boardAttrs && Object.keys(m.boardAttrs).length) out.boardAttrs = m.boardAttrs;
   if (m.label) out.label = m.label;
   if (m.title) out.title = m.title;
   if (m.classDefs.length) out.classDefs = m.classDefs;

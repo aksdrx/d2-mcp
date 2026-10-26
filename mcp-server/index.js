@@ -502,6 +502,29 @@ server.registerTool(
     const map = analyzeSvg(res.stdout, {
       grid: { cols: input.gridCols, rows: input.gridRows },
     });
+    // P0-1/P0-6: join the source model into the geometry — label->id table,
+    // shape glyph + style classes per component, authoritative diagram kind.
+    let model = null;
+    try { model = extract(base.sourceText, { resolveDir: base.baseDir }); } catch {}
+    if (model && Array.isArray(model.objects)) {
+      const byId = new Map(model.objects.map((o) => [o.id, o]));
+      for (const c of map.components) {
+        const o = byId.get(c.id);
+        if (!o) continue;
+        if (o.shape) c.shape = o.shape;
+        if (o.classes && o.classes.length) c.classes = o.classes;
+      }
+      const labels = {};
+      for (const o of model.objects) {
+        const lab = typeof o.label === "string" ? o.label.trim() : "";
+        if (lab && lab !== o.id.split(".").pop()) {
+          const key = lab.toLowerCase();
+          if (!(key in labels)) labels[key] = o.id;
+        }
+      }
+      map.labels = labels;
+    }
+    if (model && model.boardAttrs && model.boardAttrs.shape === "sequence_diagram") map.kind = "sequence";
     return json({
       ok: true,
       engine: input.layout || null,

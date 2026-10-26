@@ -67,18 +67,20 @@ for (const f of files) {
     }
   }
   const m = analyzeSvg(svg);
+  // P0-4: authoritative kind from the analyzer; the src regex stays as fallback
+  const isSeq = isSequence || m.kind === "sequence";
   const a = m.canvas.aspect;
   const problems = [];
   if (a > 2.5 || a < 0.4) problems.push('aspect ' + a.toFixed(2) + ' outside 0.4..2.5');
   const slices = (m.analysis.edgeOverlaps || []).length;
-  if (slices > 0 && !isSequence) problems.push(slices + ' edge-over-shape slice(s): ' + m.analysis.edgeOverlaps.slice(0, 3).map((o) => o.edge + ' through ' + o.shape).join('; '));
+  if (slices > 0 && !isSeq) problems.push(slices + ' edge-over-shape slice(s): ' + m.analysis.edgeOverlaps.slice(0, 3).map((o) => o.edge + ' through ' + o.shape).join('; '));
   const labelSlices = (m.analysis.edgeOverLabels || []).length;
-  if (labelSlices > 0 && !isSequence) problems.push(labelSlices + ' edge-over-label slice(s): ' + m.analysis.edgeOverLabels.slice(0, 3).map((o) => o.edge + ' over ' + o.labelOf).join('; '));
+  if (labelSlices > 0 && !isSeq) problems.push(labelSlices + ' edge-over-label slice(s): ' + m.analysis.edgeOverLabels.slice(0, 3).map((o) => o.edge + ' over ' + o.labelOf).join('; '));
   let note = m.analysis.crossings.length ? ' [' + m.analysis.crossings.length + ' crossings]' : '';
   const labColl = (m.analysis.labelCollisions || []).length;
   if (labColl) note += ' [' + labColl + ' label collision(s)]';
   if (m.analysis.zOrder && m.analysis.zOrder.edgesPaintOverShapes === false && !isSequence) note += ' [edges painted under shapes]';
-  if (isSequence && slices) note += ' [sequence: ' + slices + ' lifeline/band traversals exempt]';
+  if (isSeq && slices) note += ' [sequence: ' + slices + ' lifeline/band traversals exempt]';
   if (problems.length) { console.log('FAIL ' + rel + ' — ' + problems.join('; ') + note); bad++; }
   else console.log('PASS ' + rel + ' — ' + m.canvas.width + 'x' + m.canvas.height + ' a=' + a.toFixed(2) + note);
 }

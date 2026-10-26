@@ -205,7 +205,8 @@ export function analyzeSvg(svgText, opts = {}) {
       const { points } = parsePathD(dm[1]);
       const lt = textTag ? parseTextEl(chunk) : null;
       const labelPos = lt ? { x: lt.x, y: lt.y } : null;
-      const e = { id, src: conn.src, dst: conn.dst, label: labelPos, waypoints: points.map(([x, y]) => [Math.round(x), Math.round(y)]) };
+      const idxM = id.match(/\[([0-9]+)\]$/);
+      const e = { id, src: conn.src, dst: conn.dst, label: labelPos, waypoints: points.map(([x, y]) => [Math.round(x), Math.round(y)]), ...(idxM ? { index: Number(idxM[1]) } : {}) };
       if (lt) { e.labelText = lt.text; e.labelFs = lt.fs; e.labelBox = labelBoxOf(lt); }
       edges.push(e);
       continue;
@@ -337,7 +338,9 @@ export function analyzeSvg(svgText, opts = {}) {
   // relative-position predicates between near-enough components
   const relations = [];
   const diag = Math.hypot(bounds ? bounds.x1 - bounds.x0 : 1, bounds ? bounds.y1 - bounds.y0 : 1);
-  const top = components.filter((c) => !c.container || c.container === "title");
+  // P0-3: sub-2px bboxes (titles render as 1px-high text lines) produce absurd
+  // predicates (title left-of X) — exclude them from relation derivation.
+  const top = components.filter((c) => (!c.container || c.container === "title") && c.w >= 2 && c.h >= 2);
   for (let a = 0; a < top.length; a++) {
     for (let b = a + 1; b < top.length; b++) {
       const p = top[a];
@@ -353,6 +356,29 @@ export function analyzeSvg(svgText, opts = {}) {
       }
     }
     if (relations.length > 60) break;
+  }
+  // P0-2: annotate ties — when several candidates sit at nearly the same gap from
+  // the same target, "the component left-of X" is genuinely ambiguous; surface it.
+  {
+    const gapOf = (a, rel, b) => {
+      const p = compById.get(a), q = compById.get(b);
+      if (!p || !q) return Infinity;
+      if (rel === "left-of") return q.x - (p.x + p.w);
+      return q.y - (p.y + p.h);
+    };
+    const groups = new Map();
+    for (const r of relations) {
+      const k = r.rel + "\u0000" + r.b;
+      if (!groups.has(k)) groups.set(k, []);
+      groups.get(k).push(r);
+    }
+    for (const rs of groups.values()) {
+      if (rs.length < 2) continue;
+      let best = Infinity;
+      for (const r of rs) best = Math.min(best, gapOf(r.a, r.rel, r.b));
+      const tied = rs.filter((r) => gapOf(r.a, r.rel, r.b) <= best + 8).map((r) => r.a);
+      if (tied.length > 1) for (const r of rs) if (tied.includes(r.a)) r.tiedWith = tied.filter((x) => x !== r.a);
+    }
   }
 
   // ---- edge-over-shape slicing: an edge route passing through a shape it is
@@ -485,7 +511,12 @@ export function analyzeSvg(svgText, opts = {}) {
   }
   if (labelCollisions.length > 40) labelCollisions.length = 40;
 
+  // P0-4: sequence boards render lifelines as (X -- ) pseudo-edges
+  const lifelines = edges.filter((e) => e.dst === "" || /\(-- \)(\[[0-9]+\])?$/.test(e.id)).length;
+  const kind = lifelines > 0 ? "sequence" : "flow";
+
   return {
+    kind,
     canvas,
     components,
     edges,

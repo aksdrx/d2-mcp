@@ -90,8 +90,18 @@ async function buildOne(file) {
 
   const labeled = model.connections.filter((c) => c.label);
   if (labeled.length) {
-    const e = labeled[Math.floor(labeled.length / 2)];
-    q("edge-label", `What is the label on the connection from "${e.src}" to "${e.dst}"?`, e.label, "string");
+    // P0-5: prefer an edge whose (src,dst) pair is unique, so "the connection
+    // from X to Y" is unambiguous even with parallel edges ([0], [1], ...).
+    const counts = new Map();
+    for (const c2 of model.connections) {
+      const k = c2.src + "\u0000" + c2.dst;
+      counts.set(k, (counts.get(k) || 0) + 1);
+    }
+    const unique = labeled.filter((c2) => counts.get(c2.src + "\u0000" + c2.dst) === 1);
+    const pool = unique.length ? unique : labeled;
+    const e = pool[Math.floor(pool.length / 2)];
+    const idxSuffix = counts.get(e.src + "\u0000" + e.dst) > 1 ? ` (connection index ${model.connections.indexOf(e)})` : "";
+    q("edge-label", `What is the label on the connection from "${e.src}" to "${e.dst}"${idxSuffix}?`, e.label, "string");
   }
 
   const degree = new Map();
@@ -146,10 +156,17 @@ async function buildOne(file) {
       };
       return same.reduce((best, r) => (dist(r.a) < dist(best.a) ? r : best), same[0]);
     };
+    const tiesOf = (r) => (r && Array.isArray(r.tiedWith) ? r.tiedWith : []);
     const lr = directNeighbor("left-of");
-    if (lr) q("left-of", `In the rendered layout, which component is directly to the LEFT of "${lr.b}"? (answer with one id)`, lr.a, "string");
+    if (lr) {
+      q("left-of", `In the rendered layout, which component is directly to the LEFT of "${lr.b}"? (answer with one id)`, lr.a, "string");
+      const t = tiesOf(lr); if (t.length) K["left-of:ties"] = t;
+    }
     const ar = directNeighbor("above");
-    if (ar) q("above", `In the rendered layout, which component is directly ABOVE "${ar.b}"? (answer with one id)`, ar.a, "string");
+    if (ar) {
+      q("above", `In the rendered layout, which component is directly ABOVE "${ar.b}"? (answer with one id)`, ar.a, "string");
+      const t = tiesOf(ar); if (t.length) K["above:ties"] = t;
+    }
   }
 
   q("crossings", `With the elk engine, how many PAIRS of connections cross each other?`, map.analysis.crossings.length, "number");
@@ -195,12 +212,14 @@ function score(testPath, answersPath, keyPath) {
     const fileAnswers = given[t.dossier.file] || {};
     for (const q of t.questions) {
       total++;
-      const expected = key[t.dossier.file][q.id];
+      const fileKey = key[t.dossier.file];
+      const expected = fileKey[q.id];
+      const ties = fileKey[q.id + ":ties"] || [];
       const actual = fileAnswers[q.id];
       let ok;
       if (q.type === "set") ok = Array.isArray(actual) && setEq(actual, expected);
       else if (q.type === "number") ok = Number(actual) === Number(expected);
-      else ok = norm(actual) === norm(expected);
+      else ok = norm(actual) === norm(expected) || ties.some((x) => norm(x) === norm(actual));
       if (ok) pass++;
       lines.push(`${ok ? "PASS" : "FAIL"} ${t.dossier.file} ${q.id}: expected ${JSON.stringify(expected)} got ${JSON.stringify(actual)}`);
     }
