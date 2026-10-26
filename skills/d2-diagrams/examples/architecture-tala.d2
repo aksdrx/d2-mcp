@@ -34,9 +34,10 @@ platform: Order Platform {
     validate: Validate
     charge: Charge Payment
     fulfill: Fulfill
-    validate -> charge -> fulfill
+    validate -> charge: order
+    charge -> fulfill: paid
   }
-  gateway -> pipeline.validate
+  gateway -> pipeline.validate: process
 }
 
 stores: Datastores {

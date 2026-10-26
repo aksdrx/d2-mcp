@@ -70,14 +70,14 @@ data: Data Tier {
   index: Search Index {class: stateful}
 }
 
-client.web -> edge.cdn
+client.web -> edge.cdn: HTTPS
 client.mobile -> edge.waf: HTTPS
-edge.waf -> services.orders
-edge.waf -> services.payments
-edge.waf -> services.search
-services.orders -> data.orders_db
+edge.waf -> services.orders: REST
+edge.waf -> services.payments: REST
+edge.waf -> services.search: gRPC
+services.orders -> data.orders_db: SQL
 services.payments -> data.ledger: strong consistency
-services.search -> data.index
+services.search -> data.index: writes
 
 legend: {
   near: bottom-right

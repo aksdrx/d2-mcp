@@ -2,6 +2,7 @@
 
 vars: {
   d2-config: {
+    layout-engine: dagre
     theme-id: 105
     pad: 40
   }
@@ -24,11 +25,12 @@ rollback: Automatic rollback {
 }
 done: Deploy complete {shape: oval; style.fill: "#E8F5E9"}
 
-start -> checks -> green
+start -> checks
+checks -> green: done
 green -> canary: yes
 green -> start: "no — fix and resubmit" {style.stroke-dash: 3}
-canary -> metrics
+canary -> metrics: baked
 metrics -> full: yes
 metrics -> rollback: no
 rollback -> start: incident opened
-full -> done
+full -> done: complete

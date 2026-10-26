@@ -202,3 +202,12 @@ Procedure: `skills/d2-diagrams/reference/visual-regression.md`. First executed p
 visual 75/77 (97%) vs text 76/77 (99%) on the same battery — results and analysis in
 `_research/visual-regression/RESULTS.md` (research scratch, not tracked).
 
+## R2 scope note: vertical genres
+
+The 3:2-16:9 aspect target was written for architecture/deployment diagrams read
+left-to-right. Process genres are legitimately vertical — flowcharts, sequence
+diagrams and UML hierarchies read top-to-bottom, so aspect below 1 (typically
+0.4-0.7) is correct for them, not a defect. The gate floor (0.4..2.5) applies to
+every kind; the landscape TARGET applies only when the diagram's reading direction
+is horizontal. Pin the engine either way (R1).
+
