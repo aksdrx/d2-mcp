@@ -1,0 +1,7 @@
+# Sensitivity fixture (expect >=1 label collision, zero slices) — detector regression track; see scripts/sensitivity-check.mjs
+# Adversarial: parallel edges with long labels stacked between two hubs.
+hub1: First {shape: circle}
+hub2: Second {shape: circle}
+hub1 -> hub2: synchronize inventory state
+hub1 -> hub2: replicate audit trail
+hub1 -> hub2: stream telemetry

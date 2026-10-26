@@ -52,11 +52,11 @@ labels, glyphs and colors are views over it.
 10. ~~**Bake-off upgrade**~~ — `d2_variants` per-variant edgeOverlaps/edgeOverLabels counts;
     recommendation order becomes (slices, crossings, |aspect−1.6|).
 
-## P2 — human-plane polish
+## P2 — human-plane polish — **SHIPPED** (style-stage warnings in the gate; committed adversarial fixtures + sensitivity CI step)
 
-11. **Style-stage gates** — monochrome comprehension check (theme 1) and legend-presence
+11. ~~**Style-stage gates**~~ — monochrome comprehension check (theme 1) and legend-presence
     warning (R5/R6) in the gate's style stage.
-12. **Release regression track** — run the image-capable visual pass over the battery each
+12. ~~**Release regression track**~~ — run the image-capable visual pass over the battery each
     release; commit adversarial fixtures (forced slices, overprints, ties) alongside the
     comprehension set so detectors stay sensitive.
 

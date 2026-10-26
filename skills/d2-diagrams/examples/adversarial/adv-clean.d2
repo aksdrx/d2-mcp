@@ -1,0 +1,11 @@
+# Sensitivity fixture (expect zero findings, aspect in band) — detector regression track; see scripts/sensitivity-check.mjs
+# Adversarial control: clean diamond flow — zero findings, aspect in band.
+direction: right
+a: Alpha
+b: Beta
+c: Gamma
+d: Delta
+a -> b: left lane
+a -> c: right lane
+b -> d
+c -> d

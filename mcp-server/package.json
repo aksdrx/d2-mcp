@@ -1,7 +1,7 @@
 {
   "name": "d2-mcp-server",
-  "version": "0.4.0",
-  "description": "MCP stdio server wrapping the d2 CLI: render (with SVG dims), validate (structured errors), fmt, relationship extraction (text plane), markdown fence pipeline with sidecars, layout/style variant bake-offs, layouts, themes, version.",
+  "version": "0.5.0",
+  "description": "MCP stdio server wrapping the d2 CLI: render (with SVG dims), validate (structured errors), fmt, relationship extraction (text plane), markdown fence pipeline with dual-plane sidecars (relations v2: geometry-joined), layout/style variant bake-offs (slice-ranked), intent assertions (d2_assert), one-call visual gate (d2_visual_check), measured-geometry layout map, layouts, themes, version.",
   "type": "module",
   "main": "index.js",
   "scripts": {

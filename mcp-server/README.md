@@ -16,6 +16,8 @@ without even needing the d2 binary.
 | `d2_md_render` | render every ```d2 fence in `.md` files; refreshes image links; optional dual-plane sidecars (`.txt` + `.relations.json`) |
 | `d2_variants` | two-stage visual refinement: `stage:"layout"` renders an engine×direction bake-off; `stage:"style"` re-renders the winning layout under themes (default 1 Neutral Grey = monochrome check, 0 neutral, 8 colorblind-safe) ± sketch. Every variant returns `width/height/aspect` + `crossings`, plus a data-driven `recommended` winner. |
 | `d2_layout_map` | measured post-layout geometry as text (no image viewing needed): canvas, component bboxes/centers/containers, edge routes, crossing pairs, overlapping shapes, `textMap` grid, `left-of`/`above` predicates — lets text-only agents iterate visual composition with user feedback. |
+| `d2_assert` | intent predicates verified against measured geometry: left-of/above (tie-aware), inside, no-slices, aspect range, crossings≤N, hub-degree≤N, label-exists — per-assertion pass + measured value |
+| `d2_visual_check` | the CI visual gate as one call: aspect bounds + zero slices (sequence-exempt) + full findings payload |
 | `d2_layouts` | list layout engines on this machine |
 | `d2_themes` | list theme IDs on this machine |
 | `d2_version` | d2 CLI version string |

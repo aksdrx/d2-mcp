@@ -1,0 +1,15 @@
+# Sensitivity fixture (expect >=1 edge-over-shape slice) — detector regression track; see scripts/sensitivity-check.mjs
+# Adversarial: a long edge forced through a middle shape (grid chain).
+grid-rows: 1
+a: Source {
+  grid-rows: 1
+  s1: Start
+}
+m: Middle Block
+z: Sink {
+  grid-rows: 1
+  e1: End
+}
+a.s1 -> z.e1: long hop
+a.s1 -> m
+m -> z.e1

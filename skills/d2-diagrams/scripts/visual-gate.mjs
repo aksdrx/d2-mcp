@@ -9,6 +9,7 @@
 //         fixtures, which deliberately include degraded layouts)
 import { spawnFile } from '../../../mcp-server/lib.js';
 import { analyzeSvg } from '../../../mcp-server/lib/svgmap.js';
+import { extract } from '../../../mcp-server/lib/extract.js';
 import { resolve, dirname, isAbsolute } from 'node:path';
 import { readdirSync, statSync, readFileSync, unlinkSync } from 'node:fs';
 import { execFileSync } from 'node:child_process';
@@ -81,6 +82,24 @@ for (const f of files) {
   if (labColl) note += ' [' + labColl + ' label collision(s)]';
   if (m.analysis.zOrder && m.analysis.zOrder.edgesPaintOverShapes === false && !isSequence) note += ' [edges painted under shapes]';
   if (isSeq && slices) note += ' [sequence: ' + slices + ' lifeline/band traversals exempt]';
+  // P2-11 style stage (warnings only — never fails the gate)
+  const styleWarnings = [];
+  try {
+    const model = extract(src, { resolveDir: dirname(f) });
+    const classes = new Set();
+    for (const o of model.objects || []) for (const c of o.classes || []) classes.add(c);
+    const hasLegend = (model.objects || []).some((o) => /legend/i.test(o.id));
+    if (classes.size >= 2 && !hasLegend) styleWarnings.push(classes.size + ' style classes, no legend (R5)');
+    if (!isSeq) {
+      const mono = await spawnFile({ source: src, cwd: dirname(f), args: ['--theme=1'], stdout: true });
+      if (mono.ok && mono.stdout) {
+        const mm = analyzeSvg(mono.stdout);
+        const d = ((mm.analysis.labelCollisions || []).length) - labColl;
+        if (d > 0) styleWarnings.push('theme-1 monochrome adds ' + d + ' label collision(s)');
+      }
+    }
+  } catch {}
+  if (styleWarnings.length) note += ' [style: ' + styleWarnings.join('; ') + ']';
   if (problems.length) { console.log('FAIL ' + rel + ' — ' + problems.join('; ') + note); bad++; }
   else console.log('PASS ' + rel + ' — ' + m.canvas.width + 'x' + m.canvas.height + ' a=' + a.toFixed(2) + note);
 }
