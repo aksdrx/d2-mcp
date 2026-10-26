@@ -122,3 +122,20 @@ P3-a (fast, high value): ruleset.json + V-rule wiring into the gate (5, 6) and t
 sequence wording fix (7). P3-b: d2_manifest + vision protocol doc (3, 8). P3-c:
 d2_focus + d2_annotate + vision render profile (1, 2, 4) + battery extension (9).
 
+## P4 — native PowerPoint round-trip — **SHIPPED** (`d2_pptx` + `d2_pptx_read`; v0.6.0)
+
+Requested directly by the user: render the SAME d2 diagrams as native PowerPoint
+shapes (not images), let the human rearrange elements in PowerPoint, then feed the
+edited deck back — text model via `d2_pptx_read` (relations JSON with positions,
+texts, head/tail connector refs; diff against the d2_pptx export manifest), vision
+model via a slide screenshot (`read_image`; LibreOffice unavailable, so PNG export
+from PowerPoint is the documented path).
+
+Implementation: `lib/pptx.js` (exportPptx: render + analyzeSvg + extract join, then
+pptxgenjs deck — preset geometries per d2 shape, containers painted largest-first,
+connectors as line shapes along the d2 waypoint routes with operator-correct
+arrowheads, edge labels at measured positions; readPptx: JSZip OOXML parse with a
+self-closing-aware element grabber). svgmap components now carry resolved `fill`/
+`stroke`. Smoke: 13 checks incl. the round-trip. Deps: pptxgenjs + jszip
+(npm --cache inside the workspace; default cache sits on a read-only mount).
+

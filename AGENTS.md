@@ -163,7 +163,7 @@ with dual-plane sidecars), `d2_variants` (layout bake-off + styling variants,
 data-driven `recommended` winner), `d2_layout_map` (measured post-layout geometry
 as text: bboxes, edge routes, crossings, textMap grid, left-of/above predicates —
 lets text-only agents iterate visual composition without viewing images),
-`d2_assert` (intent predicates verified against measured geometry), `d2_visual_check` (the CI visual gate as one call), `d2_layouts`, `d2_themes`, `d2_version`. Register it in any MCP-capable harness
+`d2_assert` (intent predicates verified against measured geometry), `d2_visual_check` (the CI visual gate as one call), `d2_pptx` (native-shape PowerPoint export — movable elements, not images), `d2_pptx_read` (ingest human-edited .pptx back as a relations model), `d2_layouts`, `d2_themes`, `d2_version`. Register it in any MCP-capable harness
 (Claude Code/Desktop, Cursor, etc.) — see `mcp-server/README.md`; research-grounded strengthening plan in `mcp-server/ROADMAP.md`.
 
 ## 8. Reference material

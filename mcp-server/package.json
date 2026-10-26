@@ -1,7 +1,7 @@
 {
   "name": "d2-mcp-server",
-  "version": "0.5.0",
-  "description": "MCP stdio server wrapping the d2 CLI: render (with SVG dims), validate (structured errors), fmt, relationship extraction (text plane), markdown fence pipeline with dual-plane sidecars (relations v2: geometry-joined), layout/style variant bake-offs (slice-ranked), intent assertions (d2_assert), one-call visual gate (d2_visual_check), measured-geometry layout map, layouts, themes, version.",
+  "version": "0.6.0",
+  "description": "MCP stdio server wrapping the d2 CLI: render (with SVG dims), validate (structured errors), fmt, relationship extraction (text plane), markdown fence pipeline with dual-plane sidecars (relations v2: geometry-joined), layout/style variant bake-offs (slice-ranked), intent assertions (d2_assert), one-call visual gate (d2_visual_check), measured-geometry layout map, native-shape PowerPoint export + re-ingest (d2_pptx / d2_pptx_read), layouts, themes, version.",
   "type": "module",
   "main": "index.js",
   "scripts": {
@@ -12,6 +12,8 @@
   },
   "dependencies": {
     "@modelcontextprotocol/sdk": "^1.17.0",
+    "jszip": "^3.10.2",
+    "pptxgenjs": "^4.0.1",
     "zod": "^3.25.0"
   }
 }

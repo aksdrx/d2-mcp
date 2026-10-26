@@ -247,6 +247,11 @@ export function analyzeSvg(svgText, opts = {}) {
         ? { x: t.x, y: t.y, text: t.text, fs: t.fs, middle: t.middle, box: labelBoxOf(t) }
         : { x: attrOf(textTag[0], "x"), y: attrOf(textTag[0], "y") };
     }
+    // resolved paint (theme colors land here): first shape fill/stroke in the chunk
+    const fillM = chunk.match(/\sfill="([^"]+)"/);
+    const strokeM = chunk.match(/\sstroke="([^"]+)"/);
+    c.fill = fillM && fillM[1] !== "none" ? fillM[1] : null;
+    c.stroke = strokeM && strokeM[1] !== "none" ? strokeM[1] : null;
     components.push(c);
   }
 

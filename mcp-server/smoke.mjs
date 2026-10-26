@@ -97,6 +97,12 @@ try {
   const vc = JSON.parse(text(await call('d2_visual_check', { source: 'a -> b -> c' })));
   check('visual_check', vc.ok === true && vc.checks.length === 3 && vc.canvas.aspect > 0,
     vc.kind + ' a=' + (vc.canvas && vc.canvas.aspect));
+  // 7b. d2_pptx round-trip: native export + read back (P4)
+  const px1 = JSON.parse(text(await call('d2_pptx', { source: 'a: Alpha\na -> b: link\nb: Beta', outPath: tmp + '/rt.pptx' })));
+  const px2 = px1.ok ? JSON.parse(text(await call('d2_pptx_read', { pptxPath: tmp + '/rt.pptx' }))) : { ok: false };
+  const moved = px2.ok && px2.shapes.length >= 2 && px2.shapes.every((s) => s.x !== null && s.y !== null && s.w !== null);
+  check('pptx_roundtrip', px1.ok === true && px1.shapes >= 2 && px2.ok === true && moved,
+    px1.ok ? px1.shapes + ' shapes, read ' + (px2.shapes || []).length : (px1.error || '').slice(0, 60));
   // 8. layouts / themes / version
   const layTxt = text(await call('d2_layouts', {}));
   check('layouts', layTxt.includes('dagre') && layTxt.includes('tala'), layTxt.slice(0, 60));
@@ -108,6 +114,6 @@ try {
   rmSync(tmp, { recursive: true, force: true });
 }
 
-console.log(fail ? 'SMOKE FAILURES: ' + fail : 'SMOKE ALL GREEN (12 checks, 10 tools + assert + visual_check)');
+console.log(fail ? 'SMOKE FAILURES: ' + fail : 'SMOKE ALL GREEN (13 checks incl. pptx round-trip)');
 p.kill();
 process.exit(fail ? 1 : 0);

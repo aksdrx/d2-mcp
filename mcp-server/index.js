@@ -22,6 +22,7 @@ import path from "node:path";
 import { spawnFile, parseDiagnostics, svgDims } from "./lib.js";
 import { analyzeSvg } from "./lib/svgmap.js";
 import { extract, toText } from "./lib/extract.js";
+import { exportPptx, readPptx } from "./lib/pptx.js";
 import { renderMarkdown } from "./lib/mdrender.js";
 
 const server = new McpServer({
@@ -30,6 +31,7 @@ const server = new McpServer({
 });
 
 const layoutEnum = z.enum(["dagre", "elk", "tala"]);
+const NLX = String.fromCharCode(10);
 const formatEnum = z.enum(["svg", "png", "pdf", "pptx", "gif", "txt", "ascii"]);
 
 const sourceOrFile = {
@@ -729,6 +731,64 @@ server.registerTool(
         : 'fix geometry first: direction/root-grid for aspect, hub width/height or split views for slices; re-run until green',
     });
   },
+);
+// ------------------------------------------------------------ d2_pptx (P4)
+server.registerTool(
+  "d2_pptx",
+  {
+    title: "Export D2 diagram as native PowerPoint shapes",
+    description:
+      "Renders and measures the diagram, then rebuilds it in .pptx as NATIVE movable " +
+      "PowerPoint shapes (preset geometries, arrow connectors, text) - not an embedded " +
+      "image. Humans can rearrange elements in PowerPoint; feed the edited file back " +
+      "via d2_pptx_read (text model) and a slide screenshot (vision model). Returns the " +
+      "export manifest (shape ids + positions) for later diffing.",
+    inputSchema: {
+      ...sourceOrFile,
+      outPath: z.string().describe("Output .pptx path"),
+      layout: layoutEnum.optional().describe("Layout engine override"),
+      direction: z.enum(["down", "up", "right", "left"]).optional().describe("Direction override"),
+      theme: z.number().int().optional().describe("Theme id"),
+    },
+  },
+  async (input) => {
+    let base;
+    try {
+      base = baseSource(input);
+    } catch (e) {
+      return { ...json({ ok: false, error: String(e.message) }), isError: true };
+    }
+    let src = base.sourceText;
+    if (input.layout) src += "## pptx-override" + NLX + "vars: { d2-config: { layout-engine: " + input.layout + " } }" + NLX;
+    if (input.theme !== undefined) src += "## pptx-override" + NLX + "vars: { d2-config: { theme-id: " + input.theme + " } }" + NLX;
+    if (input.direction) src += "## pptx-override" + NLX + "direction: " + input.direction + NLX;
+    const outPath = path.resolve(input.outPath);
+    const r = await exportPptx({ src, resolveDir: base.baseDir, outPath });
+    if (!r.ok) return { ...json(r), isError: true };
+    return json(r);
+  }
+);
+
+// ------------------------------------------------------------ d2_pptx_read (P4)
+server.registerTool(
+  "d2_pptx_read",
+  {
+    title: "Read a .pptx slide back into a relations model",
+    description:
+      "Parses a .pptx (native shapes, e.g. one produced by d2_pptx and then edited by a " +
+      "human in PowerPoint) into a relations-style JSON: shapes with ids, names, preset " +
+      "geometry, positions in px, texts, and connectors with head/tail shape references. " +
+      "Diff it against the d2_pptx export manifest to extract exactly what the human " +
+      "changed: moved, renamed, deleted or reconnected elements.",
+    inputSchema: {
+      pptxPath: z.string().describe("Path to the .pptx file"),
+    },
+  },
+  async (input) => {
+    const r = await readPptx(path.resolve(input.pptxPath));
+    if (!r.ok) return { ...json(r), isError: true };
+    return json(r);
+  }
 );
 // ------------------------------------------------------------ d2_version
 server.registerTool(
