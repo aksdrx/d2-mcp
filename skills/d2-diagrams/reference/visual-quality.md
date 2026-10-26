@@ -196,3 +196,9 @@ Machine-checked in this order (MCP names in parentheses):
    the adversarial fixtures (`examples/adversarial/`): every new defect class
    gets a fixture BEFORE it gets a fix.
 
+## Visual-model regression (when a vision-capable model is available)
+
+Procedure: `skills/d2-diagrams/reference/visual-regression.md`. First executed pass:
+visual 75/77 (97%) vs text 76/77 (99%) on the same battery — results and analysis in
+`_research/visual-regression/RESULTS.md` (research scratch, not tracked).
+
