@@ -164,3 +164,19 @@ join/anti-join on the two JSON graphs — no graph database required.
   forking copies that drift apart.
 - Commit sidecars (`.txt`, `.relations.json`) so reviewers and CI can use them
   without running tooling.
+
+## Sidecar v2 (`d2-relations-v2`)
+
+With `--sidecars`, each rendered fence also writes a geometry-joined model
+(`<name>.relations.json`, schema `d2-relations-v2`): both planes and their join
+keys in ONE artifact:
+
+- `kind`: `flow` or `sequence` (sequence boards: crossings/aspect read differently)
+- `canvas`: measured `width/height/aspect`
+- `objects[]`: source fields (id, label, container, shape, classes) plus measured `bbox` and `center`
+- `connections[]`: source fields plus parallel `index` and measured `route` waypoints
+- `analysis`: crossings count, `edgeOverlaps`, `edgeOverLabels`, `labelCollisions`
+
+Use it to verify code against diagrams without re-rendering: the label-to-id join
+is each object's own `label` to `id` pair.
+

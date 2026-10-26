@@ -48,7 +48,35 @@ for (const f of files) {
   const src = (await import('node:fs')).readFileSync(f, 'utf8');
   const isSequence = /shape:\s*sequence_diagram/.test(src);
   const isMultiboard = /^(layers|scenarios|steps):/m.test(src);
-  if (isMultiboard) { console.log('SKIP ' + rel + ' — multiboard (stdout render unsupported; covered by CI render step)'); continue; }
+  // multiboard files render per-board via --target (d2 v0.9 supports it; the
+  // stdout error only hits the default target '*'). Gate each board with a
+  // board-qualified name; single-board files fall through to the normal path.
+  if (isMultiboard) {
+    let boards = null;
+    try { boards = Object.keys(extract(src, { resolveDir: dirname(f) }).boards || {}); } catch {}
+    const targets = boards && boards.length ? boards : [''];
+    for (const tb of targets) {
+      const tag = tb ? rel + '#' + tb : rel + '#root';
+      let svg2 = '';
+      try {
+        const rr = await spawnFile({ source: src, cwd: dirname(f), args: ['--target=' + (tb ? tb : '')], stdout: true });
+        if (rr.ok) svg2 = rr.stdout;
+      } catch {}
+      if (!svg2) { console.log('SKIP ' + tag + ' — board render unavailable'); continue; }
+      const mm2 = analyzeSvg(svg2);
+      const a2 = mm2.canvas.aspect;
+      const probs = [];
+      if (a2 > 2.5 || a2 < 0.4) probs.push('aspect ' + a2.toFixed(2) + ' outside 0.4..2.5');
+      const sl = (mm2.analysis.edgeOverlaps || []).length;
+      const ls = (mm2.analysis.edgeOverLabels || []).length;
+      const seq = mm2.kind === 'sequence';
+      if (sl > 0 && !seq) probs.push(sl + ' edge-over-shape slice(s)');
+      if (ls > 0 && !seq) probs.push(ls + ' edge-over-label slice(s)');
+      if (probs.length) { console.log('FAIL ' + tag + ' — ' + probs.join('; ')); bad++; }
+      else console.log('PASS ' + tag + ' — ' + mm2.canvas.width + 'x' + mm2.canvas.height + ' a=' + a2.toFixed(2));
+    }
+    continue;
+  }
   const r = await spawnFile({ source: src, cwd: dirname(f), stdout: true });
   let svg = r.stdout;
   if (!r.ok) {

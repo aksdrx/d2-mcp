@@ -145,12 +145,14 @@ Full workflows: `reference/models-views.md` (text plane + JSON contract) and
 ## When the user wants MCP integration
 
 Point them to `mcp-server/` in the repo root: a stdio MCP server wrapping the d2 CLI
-with 10 tools — `d2_render` (returns width/height/aspect), `d2_validate` (structured
+with 12 tools — `d2_render` (returns width/height/aspect), `d2_validate` (structured
 errors), `d2_fmt`, `d2_extract` (relationships as JSON/text + hub metrics, no binary
 needed), `d2_md_render` (render every d2 fence in a .md, optional sidecars),
 `d2_variants` (layout bake-off + styling variants, data-driven `recommended`),
 `d2_layout_map` (measured post-layout geometry as text for blind agents),
-`d2_layouts`, `d2_themes`, `d2_version` — that any MCP-capable harness can register.
+`d2_assert` (intent predicates verified against that geometry), `d2_visual_check`
+(the CI visual gate as one call), `d2_layouts`, `d2_themes`, `d2_version` — that any
+MCP-capable harness can register.
 See `mcp-server/README.md`.
 
 ## Reference index

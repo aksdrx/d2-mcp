@@ -44,8 +44,9 @@ skills/d2-diagrams/
     install.ps1                d2 installer: Windows (winget or user-local tarball)
     render.sh / render.ps1     fmt + validate + render in one command
     render_md.py               renders ```d2 fences inside .md files (stdlib only)
-mcp-server/                    MCP stdio server: render/validate/fmt/extract/md_render/
-                               variants/layout_map/layouts/themes/version (see mcp-server/README.md)
+mcp-server/                    MCP stdio server: render/validate/fmt/extract/md_render (sidecar v2)/
+                               variants (slice-ranked)/layout_map/assert/visual_check/
+                               layouts/themes/version (see mcp-server/README.md)
   lib/extract.js              pure-JS relationship extractor (CLI too: --json/--text)
   lib/mdrender.js              JS fence-render pipeline with dual-plane sidecars
 examples-md/demo.md            the Markdown embedding convention, end to end

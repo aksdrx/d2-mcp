@@ -176,3 +176,23 @@ TALA when you need whiteboard-style control.**
   showcase examples; `d2_layout_map` reports both as `analysis.crossings` and
   `analysis.edgeOverlaps`. Sequence diagrams are exempt from the slice check
   (lifelines legitimately traverse groups).
+
+## Agent verification loop
+
+Machine-checked in this order (MCP names in parentheses):
+
+1. **Bake-off** — `d2_variants stage='layout'`; recommendation ranks by
+   (edge slices, label slices, crossings, |aspect-1.6|). Persist the winner in
+   `vars.d2-config`.
+2. **Intent** — `d2_assert` your claims about the composition (left-of/above,
+   inside, no-slices, aspect band, hub degree, label exists); every assertion
+   returns the measured value.
+3. **Floor** — `d2_visual_check` (one call) or the CI gate
+   `scripts/visual-gate.mjs`: aspect inside 0.4..2.5, zero edge slices, zero
+   label slices (sequence boards exempt). The gate also checks every board of a
+   multiboard file via `--target` and warns on style-stage issues
+   (classes without a legend; theme-1 monochrome collisions).
+4. **Sensitivity** — `scripts/sensitivity-check.mjs` pins detector behavior on
+   the adversarial fixtures (`examples/adversarial/`): every new defect class
+   gets a fixture BEFORE it gets a fix.
+

@@ -11,7 +11,7 @@ vars: {
   }
 }
 
-direction: right
+direction: down
 
 user: User {shape: person}
 lb: Load Balancer
@@ -24,6 +24,7 @@ user -> lb -> app -> db
 
 layers: {
   internals: App Internals {
+    direction: down
     router: Router
     auth: Auth Middleware
     handler: Order Handler
@@ -39,6 +40,7 @@ layers: {
 
 scenarios: {
   incident: DB outage {
+    direction: down
     db.style: {
       opacity: 0.25
       stroke-dash: 4
@@ -53,6 +55,13 @@ scenarios: {
     status: 503 spike on /orders {
       near: top-center
       style.font-color: "#C62828"
+    }
+    impact: |md
+      **Impact:** order flow degraded for ~4 min; canary rollout paused.
+      Root cause: connection pool exhaustion behind the DB outage.
+    | {
+      width: 340
+      near: bottom-center
     }
   }
 }
