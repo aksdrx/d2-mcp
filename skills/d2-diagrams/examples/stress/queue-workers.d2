@@ -1,0 +1,51 @@
+# adapted from https://github.com/golang-queue/queue/tree/14d8b998f26a728feed7bdd8acdf73d5cbc34ac4/images
+# (d2lang.com gallery "golang-queue") — classes, multiples, ring buffer; icons dropped for offline CI
+vars: {
+  d2-config: {
+    layout-engine: dagre
+    theme-id: 105
+    pad: 40
+  }
+}
+
+direction: down
+
+classes: {
+  base: {style.bold: true}
+  person: {shape: person}
+  multiple: {style.multiple: true}
+}
+
+user01: User01 {class: [base; person; multiple]}
+user02: User02 {class: [base; person; multiple]}
+user03: User03 {class: [base; person; multiple]}
+
+container: Application {
+  task01: Task01 {class: multiple}
+  task02: Task02 {class: multiple}
+  task03: Task03 {class: multiple}
+
+  queue: Queue Library {
+    producer: Produce
+    database: Ring\nBuffer {shape: cylinder}
+    consumer: Consumer
+    producer -> database: enqueue
+    database -> consumer: drain
+  }
+
+  worker01: Worker01
+  worker02: Worker02
+  worker03: Worker03
+  worker04: Worker04
+}
+
+user01 -> container.task01: create task
+user02 -> container.task02: create task
+user03 -> container.task03: create task
+container.task01 -> container.queue.producer: enqueue task
+container.task02 -> container.queue.producer: enqueue task
+container.task03 -> container.queue.producer: enqueue task
+container.queue.consumer -> container.worker01: dispatch task
+container.queue.consumer -> container.worker02: dispatch task
+container.queue.consumer -> container.worker03: dispatch task
+container.queue.consumer -> container.worker04: dispatch task

@@ -1,0 +1,66 @@
+# authored — KPI dashboard: grid layout + markdown metric tables (quantitative plane)
+vars: {
+  d2-config: {
+    layout-engine: elk
+    theme-id: 105
+    pad: 40
+  }
+}
+
+direction: right
+
+title: |md
+  # Edge platform — Q3 SLO dashboard
+| {near: top-center}
+
+metrics: {
+  grid-columns: 3
+
+  traffic: ||md
+    ## Traffic
+    | metric | value | vs Q2 |
+    |---|---|---|
+    | requests | 412B | +18% |
+    | cache hit | 96.4% | +1.1pp |
+    | egress | 8.1 PB | +22% |
+  || {width: 280}
+
+  latency: ||md
+    ## Latency
+    | route | p50 | p99 |
+    |---|---|---|
+    | /api/v2 | 12 ms | 45 ms |
+    | /search | 31 ms | 210 ms |
+    | /media | 4 ms | 18 ms |
+  || {width: 280}
+
+  reliability: ||md
+    ## Reliability
+    | service | SLO | budget left |
+    |---|---|---|
+    | api | 99.95% | 41% |
+    | search | 99.9% | 7% |
+    | media | 99.99% | 63% |
+  || {width: 280}
+}
+
+edge: Edge PoP {
+  grid-columns: 3
+  pop-fra: FRA {tooltip: 6 nodes}
+  pop-iad: IAD {tooltip: 9 nodes}
+  pop-sin: SIN {tooltip: 4 nodes}
+}
+
+origin: Origin {
+  api: API tier
+  search: Search cluster
+  media: Media store {shape: cylinder}
+}
+
+edge.pop-fra -> origin.api: 120 rps
+edge.pop-iad -> origin.api: 340 rps
+edge.pop-sin -> origin.api: 95 rps
+edge.pop-fra -> origin.search: 40 rps
+edge.pop-iad -> origin.search: 88 rps
+edge.pop-sin -> origin.search: 22 rps
+edge.* -> origin.media: cache miss 3.6%

@@ -1,0 +1,65 @@
+# adapted from https://github.com/judepayne/dictim.cookbook/blob/1ed5477a1674c66ea8fed221e83379bdc23cd8ec/samples/in.d2
+# (d2lang.com gallery "bank-securities") — quantitative: per-app TCO, cross-desk flows
+vars: {
+  d2-config: {
+    layout-engine: dagre
+    theme-id: 105
+    pad: 40
+  }
+}
+
+bank: {
+  Corporate: {
+    app14506: Data Source\ntco:      100,000\nowner: Lakshmi
+  }
+  Equities: {
+    app14491: Risk Global\ntco:      600,000\nowner: Wendy
+    app14492: Credit guard\ntco:      100,000\nowner: Lakshmi
+    app14520: Seven heaven\ntco:      100,000\nowner: Tomos
+    app14522: Apac Ace\ntco:      400,000\nowner: Wendy
+    app14527: Risk Global\ntco:      900,000\nowner: Tomos
+  }
+  Securities: {
+    app14517: Zone out\ntco:      500,000\nowner: Wendy
+  }
+  Finance: {
+    app14488: Credit guard\ntco:      700,000\nowner: India
+    app14502: Ark Crypto\ntco:    1,500,000\nowner: Wendy
+    app14510: Data Solar\ntco:    1,200,000\nowner: Deepak
+  }
+  Risk: {
+    app14490: Seven heaven\ntco:            0\nowner: Joesph
+    app14507: Crypto Bot\ntco:    1,100,000\nowner: Wendy
+  }
+  Funds: {
+    app14497: Risk Global\ntco:      500,000\nowner: Joesph
+  }
+  Fixed Income: {
+    app14523: ARC3\ntco:      600,000\nowner: Wendy
+    app14500: Acmaze\ntco:      100,000\nowner: Tomos
+  }
+}
+
+bank.Risk.app14490 -> bank.Equities.app14527: client master
+bank.Equities.app14491 -> bank.Equities.app14527: greeks
+bank.Funds.app14497 -> bank.Equities.app14520: allocations
+bank.Equities.app14527 -> bank.Corporate.app14506: trades
+bank.Fixed Income.app14523 -> bank.Equities.app14491: orders
+bank.Finance.app14488 -> bank.Equities.app14527: greeks
+bank.Equities.app14527 -> bank.Equities.app14522: orders
+bank.Equities.app14522 -> bank.Finance.app14510: orders
+bank.Equities.app14527 -> bank.Finance.app14502: greeks
+bank.Equities.app14527 -> bank.Risk.app14507: allocations
+bank.Securities.app14517 -> bank.Equities.app14492: trades
+bank.Equities.app14522 -> bank.Fixed Income.app14500: security reference
+
+classes: {
+  red-anim: {style.stroke: red}
+  blue: {style.stroke: blue}
+  green: {style.stroke: green}
+}
+(bank.* -> bank.Equities.app14527)[*].class: red-anim
+(bank.Equities.* -> bank.*.*)[*].class: green
+(bank.*.* -> bank.Equities.*)[*].class: blue
+
+direction: down

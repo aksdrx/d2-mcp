@@ -1,0 +1,80 @@
+# adapted from https://github.com/dbt-labs/terraform-provider-dbtcloud/blob/64d953f5643d221263cb10e065439114cab8c73b/terraform_resources.d2
+# (d2lang.com gallery "terraform-resources") — ~40 resources, grid credentials, glob styles
+vars: {
+  d2-config: {
+    layout-engine: elk
+    theme-id: 105
+    pad: 40
+  }
+}
+
+direction: down
+
+title: |md
+  # Terraform resources (v1.0.0)
+| {near: top-center}
+
+project_connection
+privatelink_endpoint: {tooltip: Datasource only}
+group
+group_partial_permissions
+service_token
+job
+
+conns: Connections (will be removed in the future,\nuse global_connection) {
+  bigquery_connection
+  fabric_connection
+  connection
+}
+
+env_creds: Environment Credentials {
+  grid-columns: 2
+  athena_credential
+  databricks_credential
+  snowflake_credential
+  bigquery_credential
+  fabric_credential
+  postgres_credential: {tooltip: Is used for Redshift as well}
+  teradata_credential
+}
+
+service_token -- project: scoped by
+group -- project: groups users of
+group_partial_permissions -- project: partial grants on
+user_groups -- group: defines
+user_groups -- group_partial_permissions: fills
+project -- environment: runs in
+project -- snowflake_semantic_layer_credential: stores
+job -- environment: executes in
+job -- environment_variable_job_override: parameterized by
+notification -- job: reports on
+partial_notification -- job: subset reports on
+webhook -- job: triggered by
+environment -- global_connection: resolves
+environment -- conns: legacy resolves
+global_connection -- privatelink_endpoint: routes via
+global_connection -- oauth_configuration: authorizes via
+environment -- env_creds: uses
+conns -- privatelink_endpoint: routes via
+project -- project_repository: links
+lineage_integration -- project: attached to
+project_repository -- repository: clones
+environment -- environment_variable: reads
+environment -- partial_environment_variable: reads subset
+environment -- extended_attributes: extends
+environment -- semantic_layer_configuration: configured by
+model_notifications -- environment: observes
+project -- project_connection: owns
+project_connection -- conns: backed by
+
+account_level_settings: Account level settings {
+  account_features
+  ip_restrictions_rule
+  license_map
+  partial_license_map
+}
+account_level_settings -- project: applies to
+account_level_settings -- group: applies to
+
+(job -- *)[*].style.stroke: green
+(* -- job)[*].style.stroke: green

@@ -1,0 +1,1497 @@
+{
+ "when": "2026-10-27T05:55:08.146Z",
+ "tookMs": 19996,
+ "tools": {
+  "d2": "v0.9.0",
+  "node": "v24.19.0"
+ },
+ "source": {
+  "entries": [
+   {
+    "set": "adversarial",
+    "file": "adversarial/adv-clean.d2",
+    "renderOk": true,
+    "kind": "flow",
+    "objects": 4,
+    "conns": 4,
+    "unlabeled": 2,
+    "visibleConns": 4,
+    "suspended": 0,
+    "pinnedEngine": null,
+    "pinnedTheme": null,
+    "pinnedPad": null,
+    "direction": "right",
+    "canvas": {
+     "w": 743,
+     "h": 394
+    },
+    "a": 1.89,
+    "cross": null,
+    "collisions": null,
+    "slices": null,
+    "labelSlices": null
+   },
+   {
+    "set": "adversarial",
+    "file": "adversarial/adv-labels.d2",
+    "renderOk": true,
+    "kind": "flow",
+    "objects": 2,
+    "conns": 3,
+    "unlabeled": 0,
+    "visibleConns": 3,
+    "suspended": 0,
+    "pinnedEngine": null,
+    "pinnedTheme": null,
+    "pinnedPad": null,
+    "direction": "down",
+    "canvas": {
+     "w": 648,
+     "h": 537
+    },
+    "a": 1.21,
+    "cross": null,
+    "collisions": null,
+    "slices": null,
+    "labelSlices": null
+   },
+   {
+    "set": "adversarial",
+    "file": "adversarial/adv-overlap.d2",
+    "renderOk": true,
+    "kind": "flow",
+    "objects": 5,
+    "conns": 3,
+    "unlabeled": 2,
+    "visibleConns": 3,
+    "suspended": 0,
+    "pinnedEngine": null,
+    "pinnedTheme": null,
+    "pinnedPad": null,
+    "direction": "down",
+    "canvas": {
+     "w": 809,
+     "h": 388
+    },
+    "a": 2.09,
+    "cross": null,
+    "collisions": null,
+    "slices": null,
+    "labelSlices": null
+   },
+   {
+    "set": "showcase",
+    "file": "architecture-grid.d2",
+    "renderOk": true,
+    "kind": "flow",
+    "objects": 19,
+    "conns": 8,
+    "unlabeled": 0,
+    "visibleConns": 8,
+    "suspended": 0,
+    "pinnedEngine": "dagre",
+    "pinnedTheme": 105,
+    "pinnedPad": 40,
+    "direction": "down",
+    "canvas": {
+     "w": 1377,
+     "h": 1306
+    },
+    "a": 1.05,
+    "cross": null,
+    "collisions": null,
+    "slices": null,
+    "labelSlices": null
+   },
+   {
+    "set": "showcase",
+    "file": "architecture-tala.d2",
+    "renderOk": true,
+    "kind": "flow",
+    "objects": 14,
+    "conns": 6,
+    "unlabeled": 0,
+    "visibleConns": 6,
+    "suspended": 0,
+    "pinnedEngine": "tala",
+    "pinnedTheme": 105,
+    "pinnedPad": 60,
+    "direction": "right",
+    "canvas": {
+     "w": 801,
+     "h": 1839
+    },
+    "a": 0.44,
+    "cross": null,
+    "collisions": null,
+    "slices": null,
+    "labelSlices": null
+   },
+   {
+    "set": "showcase",
+    "file": "c4-container.d2",
+    "renderOk": true,
+    "kind": "flow",
+    "objects": 8,
+    "conns": 7,
+    "unlabeled": 0,
+    "visibleConns": 7,
+    "suspended": 0,
+    "pinnedEngine": "dagre",
+    "pinnedTheme": 105,
+    "pinnedPad": 40,
+    "direction": "down",
+    "canvas": {
+     "w": 1088,
+     "h": 1055
+    },
+    "a": 1.03,
+    "cross": null,
+    "collisions": null,
+    "slices": null,
+    "labelSlices": null
+   },
+   {
+    "set": "showcase",
+    "file": "composition.d2",
+    "renderOk": true,
+    "kind": "flow",
+    "objects": 7,
+    "conns": 3,
+    "unlabeled": 0,
+    "visibleConns": 3,
+    "suspended": 0,
+    "pinnedEngine": "dagre",
+    "pinnedTheme": 105,
+    "pinnedPad": 40,
+    "direction": "down",
+    "canvas": {
+     "w": 660,
+     "h": 881
+    },
+    "a": 0.75,
+    "cross": null,
+    "collisions": null,
+    "slices": null,
+    "labelSlices": null
+   },
+   {
+    "set": "comprehension",
+    "file": "comprehension/cdn-topology.d2",
+    "renderOk": true,
+    "kind": "flow",
+    "objects": 7,
+    "conns": 6,
+    "unlabeled": 0,
+    "visibleConns": 6,
+    "suspended": 0,
+    "pinnedEngine": null,
+    "pinnedTheme": null,
+    "pinnedPad": null,
+    "direction": "down",
+    "canvas": {
+     "w": 684,
+     "h": 727
+    },
+    "a": 0.94,
+    "cross": null,
+    "collisions": null,
+    "slices": null,
+    "labelSlices": null
+   },
+   {
+    "set": "comprehension",
+    "file": "comprehension/circuit-breaker-states.d2",
+    "renderOk": true,
+    "kind": "flow",
+    "objects": 3,
+    "conns": 4,
+    "unlabeled": 0,
+    "visibleConns": 4,
+    "suspended": 0,
+    "pinnedEngine": null,
+    "pinnedTheme": null,
+    "pinnedPad": null,
+    "direction": "right",
+    "canvas": {
+     "w": 1609,
+     "h": 376
+    },
+    "a": 4.28,
+    "cross": null,
+    "collisions": null,
+    "slices": null,
+    "labelSlices": null
+   },
+   {
+    "set": "comprehension",
+    "file": "comprehension/containers.d2",
+    "renderOk": true,
+    "kind": "flow",
+    "objects": 17,
+    "conns": 15,
+    "unlabeled": 0,
+    "visibleConns": 15,
+    "suspended": 0,
+    "pinnedEngine": null,
+    "pinnedTheme": null,
+    "pinnedPad": null,
+    "direction": "right",
+    "canvas": {
+     "w": 3600,
+     "h": 763
+    },
+    "a": 4.72,
+    "cross": null,
+    "collisions": null,
+    "slices": null,
+    "labelSlices": null
+   },
+   {
+    "set": "comprehension",
+    "file": "comprehension/cqrs-sequence.d2",
+    "renderOk": true,
+    "kind": "sequence",
+    "objects": 8,
+    "conns": 14,
+    "unlabeled": 0,
+    "visibleConns": 14,
+    "suspended": 0,
+    "pinnedEngine": null,
+    "pinnedTheme": null,
+    "pinnedPad": null,
+    "direction": "down",
+    "canvas": {
+     "w": 1304,
+     "h": 1682
+    },
+    "a": 0.78,
+    "cross": null,
+    "collisions": null,
+    "slices": null,
+    "labelSlices": null
+   },
+   {
+    "set": "comprehension",
+    "file": "comprehension/dense.d2",
+    "renderOk": true,
+    "kind": "flow",
+    "objects": 9,
+    "conns": 15,
+    "unlabeled": 0,
+    "visibleConns": 15,
+    "suspended": 0,
+    "pinnedEngine": null,
+    "pinnedTheme": null,
+    "pinnedPad": null,
+    "direction": "right",
+    "canvas": {
+     "w": 2078,
+     "h": 681
+    },
+    "a": 3.05,
+    "cross": null,
+    "collisions": null,
+    "slices": null,
+    "labelSlices": null
+   },
+   {
+    "set": "comprehension",
+    "file": "comprehension/grid.d2",
+    "renderOk": true,
+    "kind": "flow",
+    "objects": 13,
+    "conns": 12,
+    "unlabeled": 0,
+    "visibleConns": 12,
+    "suspended": 0,
+    "pinnedEngine": null,
+    "pinnedTheme": null,
+    "pinnedPad": null,
+    "direction": "right",
+    "canvas": {
+     "w": 882,
+     "h": 1114
+    },
+    "a": 0.79,
+    "cross": null,
+    "collisions": null,
+    "slices": null,
+    "labelSlices": null
+   },
+   {
+    "set": "comprehension",
+    "file": "comprehension/pipeline.d2",
+    "renderOk": true,
+    "kind": "flow",
+    "objects": 12,
+    "conns": 12,
+    "unlabeled": 0,
+    "visibleConns": 12,
+    "suspended": 0,
+    "pinnedEngine": null,
+    "pinnedTheme": null,
+    "pinnedPad": null,
+    "direction": "right",
+    "canvas": {
+     "w": 2682,
+     "h": 803
+    },
+    "a": 3.34,
+    "cross": null,
+    "collisions": null,
+    "slices": null,
+    "labelSlices": null
+   },
+   {
+    "set": "comprehension",
+    "file": "comprehension/pubsub-topology.d2",
+    "renderOk": true,
+    "kind": "flow",
+    "objects": 9,
+    "conns": 7,
+    "unlabeled": 0,
+    "visibleConns": 7,
+    "suspended": 0,
+    "pinnedEngine": null,
+    "pinnedTheme": null,
+    "pinnedPad": null,
+    "direction": "down",
+    "canvas": {
+     "w": 927,
+     "h": 774
+    },
+    "a": 1.2,
+    "cross": null,
+    "collisions": null,
+    "slices": null,
+    "labelSlices": null
+   },
+   {
+    "set": "showcase",
+    "file": "erd.d2",
+    "renderOk": true,
+    "kind": "flow",
+    "objects": 10,
+    "conns": 3,
+    "unlabeled": 0,
+    "visibleConns": 3,
+    "suspended": 0,
+    "pinnedEngine": "elk",
+    "pinnedTheme": 105,
+    "pinnedPad": 40,
+    "direction": "down",
+    "canvas": {
+     "w": 1476,
+     "h": 887
+    },
+    "a": 1.66,
+    "cross": null,
+    "collisions": null,
+    "slices": null,
+    "labelSlices": null
+   },
+   {
+    "set": "showcase",
+    "file": "flowchart.d2",
+    "renderOk": true,
+    "kind": "flow",
+    "objects": 8,
+    "conns": 9,
+    "unlabeled": 0,
+    "visibleConns": 9,
+    "suspended": 0,
+    "pinnedEngine": "dagre",
+    "pinnedTheme": 105,
+    "pinnedPad": 40,
+    "direction": "down",
+    "canvas": {
+     "w": 634,
+     "h": 1381
+    },
+    "a": 0.46,
+    "cross": null,
+    "collisions": null,
+    "slices": null,
+    "labelSlices": null
+   },
+   {
+    "set": "model-views",
+    "file": "model-views/model.d2",
+    "renderOk": true,
+    "kind": "flow",
+    "objects": 8,
+    "conns": 8,
+    "unlabeled": 0,
+    "visibleConns": 8,
+    "suspended": 0,
+    "pinnedEngine": "tala",
+    "pinnedTheme": 300,
+    "pinnedPad": 40,
+    "direction": "right",
+    "canvas": {
+     "w": 1228,
+     "h": 633
+    },
+    "a": 1.94,
+    "cross": null,
+    "collisions": null,
+    "slices": null,
+    "labelSlices": null
+   },
+   {
+    "set": "model-views",
+    "file": "model-views/view-full.d2",
+    "renderOk": true,
+    "kind": "flow",
+    "objects": 8,
+    "conns": 8,
+    "unlabeled": 0,
+    "visibleConns": 8,
+    "suspended": 0,
+    "pinnedEngine": "tala",
+    "pinnedTheme": 300,
+    "pinnedPad": 40,
+    "direction": "right",
+    "canvas": {
+     "w": 1228,
+     "h": 633
+    },
+    "a": 1.94,
+    "cross": null,
+    "collisions": null,
+    "slices": null,
+    "labelSlices": null
+   },
+   {
+    "set": "model-views",
+    "file": "model-views/view-payment-flow.d2",
+    "renderOk": true,
+    "kind": "flow",
+    "objects": 8,
+    "conns": 8,
+    "unlabeled": 0,
+    "visibleConns": 2,
+    "suspended": 11,
+    "pinnedEngine": "tala",
+    "pinnedTheme": 300,
+    "pinnedPad": 40,
+    "direction": "right",
+    "canvas": {
+     "w": 310,
+     "h": 596
+    },
+    "a": 0.52,
+    "cross": null,
+    "collisions": null,
+    "slices": null,
+    "labelSlices": null
+   },
+   {
+    "set": "model-views",
+    "file": "model-views/view-read-path.d2",
+    "renderOk": true,
+    "kind": "flow",
+    "objects": 8,
+    "conns": 8,
+    "unlabeled": 0,
+    "visibleConns": 2,
+    "suspended": 10,
+    "pinnedEngine": "tala",
+    "pinnedTheme": 300,
+    "pinnedPad": 40,
+    "direction": "right",
+    "canvas": {
+     "w": 504,
+     "h": 286
+    },
+    "a": 1.76,
+    "cross": null,
+    "collisions": null,
+    "slices": null,
+    "labelSlices": null
+   },
+   {
+    "set": "showcase",
+    "file": "sequence.d2",
+    "renderOk": true,
+    "kind": "sequence",
+    "objects": 14,
+    "conns": 10,
+    "unlabeled": 0,
+    "visibleConns": 10,
+    "suspended": 0,
+    "pinnedEngine": "dagre",
+    "pinnedTheme": 105,
+    "pinnedPad": 40,
+    "direction": "down",
+    "canvas": {
+     "w": 846,
+     "h": 1497
+    },
+    "a": 0.57,
+    "cross": null,
+    "collisions": null,
+    "slices": null,
+    "labelSlices": null
+   },
+   {
+    "set": "stress",
+    "file": "stress/bank-tco.d2",
+    "renderOk": true,
+    "kind": "flow",
+    "objects": 23,
+    "conns": 12,
+    "unlabeled": 0,
+    "visibleConns": 12,
+    "suspended": 0,
+    "pinnedEngine": "dagre",
+    "pinnedTheme": 105,
+    "pinnedPad": 40,
+    "direction": "down",
+    "canvas": {
+     "w": 2433,
+     "h": 1477
+    },
+    "a": 1.65,
+    "cross": null,
+    "collisions": null,
+    "slices": null,
+    "labelSlices": null
+   },
+   {
+    "set": "stress",
+    "file": "stress/clos-network.d2",
+    "renderOk": true,
+    "kind": "flow",
+    "objects": 14,
+    "conns": 13,
+    "unlabeled": 0,
+    "visibleConns": 13,
+    "suspended": 0,
+    "pinnedEngine": "dagre",
+    "pinnedTheme": 105,
+    "pinnedPad": 40,
+    "direction": "down",
+    "canvas": {
+     "w": 1314,
+     "h": 853
+    },
+    "a": 1.54,
+    "cross": null,
+    "collisions": null,
+    "slices": null,
+    "labelSlices": null
+   },
+   {
+    "set": "stress",
+    "file": "stress/erd-analytics.d2",
+    "renderOk": true,
+    "kind": "flow",
+    "objects": 19,
+    "conns": 8,
+    "unlabeled": 0,
+    "visibleConns": 8,
+    "suspended": 0,
+    "pinnedEngine": "elk",
+    "pinnedTheme": 105,
+    "pinnedPad": 40,
+    "direction": "right",
+    "canvas": {
+     "w": 1411,
+     "h": 982
+    },
+    "a": 1.44,
+    "cross": null,
+    "collisions": null,
+    "slices": null,
+    "labelSlices": null
+   },
+   {
+    "set": "stress",
+    "file": "stress/kpi-dashboard.d2",
+    "renderOk": true,
+    "kind": "flow",
+    "objects": 12,
+    "conns": 6,
+    "unlabeled": 0,
+    "visibleConns": 6,
+    "suspended": 0,
+    "pinnedEngine": "elk",
+    "pinnedTheme": 105,
+    "pinnedPad": 40,
+    "direction": "right",
+    "canvas": {
+     "w": 1122,
+     "h": 1094
+    },
+    "a": 1.03,
+    "cross": null,
+    "collisions": null,
+    "slices": null,
+    "labelSlices": null
+   },
+   {
+    "set": "stress",
+    "file": "stress/queue-workers.d2",
+    "renderOk": true,
+    "kind": "flow",
+    "objects": 15,
+    "conns": 12,
+    "unlabeled": 0,
+    "visibleConns": 12,
+    "suspended": 0,
+    "pinnedEngine": "dagre",
+    "pinnedTheme": 105,
+    "pinnedPad": 40,
+    "direction": "down",
+    "canvas": {
+     "w": 794,
+     "h": 1342
+    },
+    "a": 0.59,
+    "cross": null,
+    "collisions": null,
+    "slices": null,
+    "labelSlices": null
+   },
+   {
+    "set": "stress",
+    "file": "stress/terraform-dbtlabs.d2",
+    "renderOk": true,
+    "kind": "flow",
+    "objects": 41,
+    "conns": 30,
+    "unlabeled": 0,
+    "visibleConns": 30,
+    "suspended": 0,
+    "pinnedEngine": "elk",
+    "pinnedTheme": 105,
+    "pinnedPad": 40,
+    "direction": "down",
+    "canvas": {
+     "w": 2976,
+     "h": 2272
+    },
+    "a": 1.31,
+    "cross": null,
+    "collisions": null,
+    "slices": null,
+    "labelSlices": null
+   },
+   {
+    "set": "showcase",
+    "file": "uml-class.d2",
+    "renderOk": true,
+    "kind": "flow",
+    "objects": 5,
+    "conns": 4,
+    "unlabeled": 0,
+    "visibleConns": 4,
+    "suspended": 0,
+    "pinnedEngine": "elk",
+    "pinnedTheme": 105,
+    "pinnedPad": 40,
+    "direction": "down",
+    "canvas": {
+     "w": 704,
+     "h": 1068
+    },
+    "a": 0.66,
+    "cross": null,
+    "collisions": null,
+    "slices": null,
+    "labelSlices": null
+   }
+  ]
+ },
+ "fidelity": {
+  "results": [
+   {
+    "set": "adversarial",
+    "file": "skills/d2-diagrams/examples/adversarial/adv-clean.d2",
+    "ok": true,
+    "skip": null,
+    "problems": [],
+    "shapes": 14,
+    "lines": 4,
+    "conns": 4,
+    "driftPx": 0
+   },
+   {
+    "set": "adversarial",
+    "file": "skills/d2-diagrams/examples/adversarial/adv-labels.d2",
+    "ok": true,
+    "skip": null,
+    "problems": [],
+    "shapes": 10,
+    "lines": 3,
+    "conns": 3,
+    "driftPx": 0
+   },
+   {
+    "set": "adversarial",
+    "file": "skills/d2-diagrams/examples/adversarial/adv-overlap.d2",
+    "ok": true,
+    "skip": null,
+    "problems": [],
+    "shapes": 14,
+    "lines": 3,
+    "conns": 3,
+    "driftPx": 0
+   },
+   {
+    "set": "showcase",
+    "file": "skills/d2-diagrams/examples/architecture-grid.d2",
+    "ok": true,
+    "skip": null,
+    "problems": [],
+    "shapes": 54,
+    "lines": 8,
+    "conns": 8,
+    "driftPx": 0
+   },
+   {
+    "set": "showcase",
+    "file": "skills/d2-diagrams/examples/architecture-tala.d2",
+    "ok": true,
+    "skip": null,
+    "problems": [],
+    "shapes": 40,
+    "lines": 6,
+    "conns": 6,
+    "driftPx": 0
+   },
+   {
+    "set": "showcase",
+    "file": "skills/d2-diagrams/examples/c4-container.d2",
+    "ok": true,
+    "skip": null,
+    "problems": [],
+    "shapes": 30,
+    "lines": 7,
+    "conns": 7,
+    "driftPx": 0
+   },
+   {
+    "set": "showcase",
+    "file": "skills/d2-diagrams/examples/composition.d2",
+    "ok": true,
+    "skip": null,
+    "problems": [],
+    "shapes": 20,
+    "lines": 3,
+    "conns": 3,
+    "driftPx": 0
+   },
+   {
+    "set": "comprehension",
+    "file": "skills/d2-diagrams/examples/comprehension/cdn-topology.d2",
+    "ok": true,
+    "skip": null,
+    "problems": [],
+    "shapes": 26,
+    "lines": 6,
+    "conns": 6,
+    "driftPx": 0
+   },
+   {
+    "set": "comprehension",
+    "file": "skills/d2-diagrams/examples/comprehension/circuit-breaker-states.d2",
+    "ok": true,
+    "skip": null,
+    "problems": [],
+    "shapes": 14,
+    "lines": 4,
+    "conns": 4,
+    "driftPx": 0
+   },
+   {
+    "set": "comprehension",
+    "file": "skills/d2-diagrams/examples/comprehension/containers.d2",
+    "ok": true,
+    "skip": null,
+    "problems": [],
+    "shapes": 66,
+    "lines": 15,
+    "conns": 15,
+    "driftPx": 0
+   },
+   {
+    "set": "comprehension",
+    "file": "skills/d2-diagrams/examples/comprehension/cqrs-sequence.d2",
+    "ok": true,
+    "skip": "sequence approximation",
+    "problems": [
+     "1 label(s) missing: staleness_window"
+    ],
+    "shapes": 48,
+    "lines": 20,
+    "conns": 14,
+    "driftPx": 0
+   },
+   {
+    "set": "comprehension",
+    "file": "skills/d2-diagrams/examples/comprehension/dense.d2",
+    "ok": true,
+    "skip": null,
+    "problems": [],
+    "shapes": 48,
+    "lines": 15,
+    "conns": 15,
+    "driftPx": 0
+   },
+   {
+    "set": "comprehension",
+    "file": "skills/d2-diagrams/examples/comprehension/grid.d2",
+    "ok": true,
+    "skip": null,
+    "problems": [],
+    "shapes": 52,
+    "lines": 12,
+    "conns": 12,
+    "driftPx": 0
+   },
+   {
+    "set": "comprehension",
+    "file": "skills/d2-diagrams/examples/comprehension/pipeline.d2",
+    "ok": true,
+    "skip": null,
+    "problems": [],
+    "shapes": 48,
+    "lines": 12,
+    "conns": 12,
+    "driftPx": 0
+   },
+   {
+    "set": "comprehension",
+    "file": "skills/d2-diagrams/examples/comprehension/pubsub-topology.d2",
+    "ok": true,
+    "skip": null,
+    "problems": [],
+    "shapes": 32,
+    "lines": 7,
+    "conns": 7,
+    "driftPx": 0
+   },
+   {
+    "set": "showcase",
+    "file": "skills/d2-diagrams/examples/erd.d2",
+    "ok": true,
+    "skip": null,
+    "problems": [],
+    "shapes": 13,
+    "lines": 3,
+    "conns": 3,
+    "driftPx": 0
+   },
+   {
+    "set": "showcase",
+    "file": "skills/d2-diagrams/examples/flowchart.d2",
+    "ok": true,
+    "skip": null,
+    "problems": [],
+    "shapes": 34,
+    "lines": 9,
+    "conns": 9,
+    "driftPx": 0
+   },
+   {
+    "set": "model-views",
+    "file": "skills/d2-diagrams/examples/model-views/model.d2",
+    "ok": true,
+    "skip": null,
+    "problems": [],
+    "shapes": 34,
+    "lines": 8,
+    "conns": 8,
+    "driftPx": 0
+   },
+   {
+    "set": "model-views",
+    "file": "skills/d2-diagrams/examples/model-views/view-full.d2",
+    "ok": true,
+    "skip": null,
+    "problems": [],
+    "shapes": 34,
+    "lines": 8,
+    "conns": 8,
+    "driftPx": 0
+   },
+   {
+    "set": "model-views",
+    "file": "skills/d2-diagrams/examples/model-views/view-payment-flow.d2",
+    "ok": true,
+    "skip": null,
+    "problems": [],
+    "shapes": 10,
+    "lines": 2,
+    "conns": 2,
+    "driftPx": 0
+   },
+   {
+    "set": "model-views",
+    "file": "skills/d2-diagrams/examples/model-views/view-read-path.d2",
+    "ok": true,
+    "skip": null,
+    "problems": [],
+    "shapes": 12,
+    "lines": 2,
+    "conns": 2,
+    "driftPx": 0
+   },
+   {
+    "set": "showcase",
+    "file": "skills/d2-diagrams/examples/sequence.d2",
+    "ok": true,
+    "skip": "sequence approximation",
+    "problems": [
+     "1 label(s) missing: checkout.payment group.api.note",
+     "position drift 77px > 3"
+    ],
+    "shapes": 44,
+    "lines": 15,
+    "conns": 10,
+    "driftPx": 77
+   },
+   {
+    "set": "stress",
+    "file": "skills/d2-diagrams/examples/stress/bank-tco.d2",
+    "ok": false,
+    "skip": null,
+    "problems": [
+     "connectors 9 < connections 12"
+    ],
+    "shapes": 64,
+    "lines": 9,
+    "conns": 12,
+    "driftPx": 0
+   },
+   {
+    "set": "stress",
+    "file": "skills/d2-diagrams/examples/stress/clos-network.d2",
+    "ok": true,
+    "skip": null,
+    "problems": [],
+    "shapes": 54,
+    "lines": 13,
+    "conns": 13,
+    "driftPx": 0
+   },
+   {
+    "set": "stress",
+    "file": "skills/d2-diagrams/examples/stress/erd-analytics.d2",
+    "ok": false,
+    "skip": null,
+    "problems": [
+     "1 label(s) missing: order_items"
+    ],
+    "shapes": 28,
+    "lines": 8,
+    "conns": 8,
+    "driftPx": 0
+   },
+   {
+    "set": "stress",
+    "file": "skills/d2-diagrams/examples/stress/kpi-dashboard.d2",
+    "ok": true,
+    "skip": null,
+    "problems": [],
+    "shapes": 44,
+    "lines": 9,
+    "conns": 6,
+    "driftPx": 0
+   },
+   {
+    "set": "stress",
+    "file": "skills/d2-diagrams/examples/stress/queue-workers.d2",
+    "ok": true,
+    "skip": null,
+    "problems": [],
+    "shapes": 48,
+    "lines": 12,
+    "conns": 12,
+    "driftPx": 0
+   },
+   {
+    "set": "stress",
+    "file": "skills/d2-diagrams/examples/stress/terraform-dbtlabs.d2",
+    "ok": false,
+    "skip": null,
+    "problems": [
+     "1 label(s) missing: conns"
+    ],
+    "shapes": 144,
+    "lines": 30,
+    "conns": 30,
+    "driftPx": 0
+   },
+   {
+    "set": "showcase",
+    "file": "skills/d2-diagrams/examples/uml-class.d2",
+    "ok": true,
+    "skip": null,
+    "problems": [],
+    "shapes": 18,
+    "lines": 4,
+    "conns": 4,
+    "driftPx": 0
+   }
+  ],
+  "bad": 3
+ },
+ "render": {
+  "scale": 2,
+  "results": [
+   {
+    "file": "skills_d2-diagrams_examples_adversarial_adv-clean.d2.pptx",
+    "ok": true,
+    "error": null,
+    "slides": 1,
+    "canvas": {
+     "width": 743,
+     "height": 394
+    },
+    "notes": [],
+    "pngMagic": true,
+    "minBytes": 25646,
+    "dimsOk": true
+   },
+   {
+    "file": "skills_d2-diagrams_examples_adversarial_adv-labels.d2.pptx",
+    "ok": true,
+    "error": null,
+    "slides": 1,
+    "canvas": {
+     "width": 648,
+     "height": 537
+    },
+    "notes": [],
+    "pngMagic": true,
+    "minBytes": 48572,
+    "dimsOk": true
+   },
+   {
+    "file": "skills_d2-diagrams_examples_adversarial_adv-overlap.d2.pptx",
+    "ok": true,
+    "error": null,
+    "slides": 1,
+    "canvas": {
+     "width": 809,
+     "height": 388
+    },
+    "notes": [],
+    "pngMagic": true,
+    "minBytes": 35229,
+    "dimsOk": true
+   },
+   {
+    "file": "skills_d2-diagrams_examples_architecture-grid.d2.pptx",
+    "ok": true,
+    "error": null,
+    "slides": 1,
+    "canvas": {
+     "width": 1377,
+     "height": 1306
+    },
+    "notes": [],
+    "pngMagic": true,
+    "minBytes": 193631,
+    "dimsOk": true
+   },
+   {
+    "file": "skills_d2-diagrams_examples_architecture-tala.d2.pptx",
+    "ok": true,
+    "error": null,
+    "slides": 1,
+    "canvas": {
+     "width": 801,
+     "height": 1839
+    },
+    "notes": [],
+    "pngMagic": true,
+    "minBytes": 174787,
+    "dimsOk": true
+   },
+   {
+    "file": "skills_d2-diagrams_examples_c4-container.d2.pptx",
+    "ok": true,
+    "error": null,
+    "slides": 1,
+    "canvas": {
+     "width": 1088,
+     "height": 1055
+    },
+    "notes": [],
+    "pngMagic": true,
+    "minBytes": 150993,
+    "dimsOk": true
+   },
+   {
+    "file": "skills_d2-diagrams_examples_composition.d2.pptx",
+    "ok": true,
+    "error": null,
+    "slides": 1,
+    "canvas": {
+     "width": 660,
+     "height": 881
+    },
+    "notes": [],
+    "pngMagic": true,
+    "minBytes": 57409,
+    "dimsOk": true
+   },
+   {
+    "file": "skills_d2-diagrams_examples_comprehension_cdn-topology.d2.pptx",
+    "ok": true,
+    "error": null,
+    "slides": 1,
+    "canvas": {
+     "width": 684,
+     "height": 727
+    },
+    "notes": [],
+    "pngMagic": true,
+    "minBytes": 95651,
+    "dimsOk": true
+   },
+   {
+    "file": "skills_d2-diagrams_examples_comprehension_circuit-breaker-states.d2.pptx",
+    "ok": true,
+    "error": null,
+    "slides": 1,
+    "canvas": {
+     "width": 1609,
+     "height": 376
+    },
+    "notes": [],
+    "pngMagic": true,
+    "minBytes": 72910,
+    "dimsOk": true
+   },
+   {
+    "file": "skills_d2-diagrams_examples_comprehension_containers.d2.pptx",
+    "ok": true,
+    "error": null,
+    "slides": 1,
+    "canvas": {
+     "width": 3600,
+     "height": 763
+    },
+    "notes": [],
+    "pngMagic": true,
+    "minBytes": 251181,
+    "dimsOk": true
+   },
+   {
+    "file": "skills_d2-diagrams_examples_comprehension_cqrs-sequence.d2.pptx",
+    "ok": true,
+    "error": null,
+    "slides": 1,
+    "canvas": {
+     "width": 1304,
+     "height": 1682
+    },
+    "notes": [],
+    "pngMagic": true,
+    "minBytes": 180797,
+    "dimsOk": true
+   },
+   {
+    "file": "skills_d2-diagrams_examples_comprehension_dense.d2.pptx",
+    "ok": true,
+    "error": null,
+    "slides": 1,
+    "canvas": {
+     "width": 2078,
+     "height": 681
+    },
+    "notes": [],
+    "pngMagic": true,
+    "minBytes": 178618,
+    "dimsOk": true
+   },
+   {
+    "file": "skills_d2-diagrams_examples_comprehension_grid.d2.pptx",
+    "ok": true,
+    "error": null,
+    "slides": 1,
+    "canvas": {
+     "width": 882,
+     "height": 1114
+    },
+    "notes": [],
+    "pngMagic": true,
+    "minBytes": 192449,
+    "dimsOk": true
+   },
+   {
+    "file": "skills_d2-diagrams_examples_comprehension_pipeline.d2.pptx",
+    "ok": true,
+    "error": null,
+    "slides": 1,
+    "canvas": {
+     "width": 2682,
+     "height": 803
+    },
+    "notes": [],
+    "pngMagic": true,
+    "minBytes": 213046,
+    "dimsOk": true
+   },
+   {
+    "file": "skills_d2-diagrams_examples_comprehension_pubsub-topology.d2.pptx",
+    "ok": true,
+    "error": null,
+    "slides": 1,
+    "canvas": {
+     "width": 927,
+     "height": 774
+    },
+    "notes": [],
+    "pngMagic": true,
+    "minBytes": 125788,
+    "dimsOk": true
+   },
+   {
+    "file": "skills_d2-diagrams_examples_erd.d2.pptx",
+    "ok": true,
+    "error": null,
+    "slides": 1,
+    "canvas": {
+     "width": 1476,
+     "height": 887
+    },
+    "notes": [],
+    "pngMagic": true,
+    "minBytes": 83071,
+    "dimsOk": true
+   },
+   {
+    "file": "skills_d2-diagrams_examples_flowchart.d2.pptx",
+    "ok": true,
+    "error": null,
+    "slides": 1,
+    "canvas": {
+     "width": 634,
+     "height": 1381
+    },
+    "notes": [],
+    "pngMagic": true,
+    "minBytes": 147746,
+    "dimsOk": true
+   },
+   {
+    "file": "skills_d2-diagrams_examples_model-views_model.d2.pptx",
+    "ok": true,
+    "error": null,
+    "slides": 1,
+    "canvas": {
+     "width": 1228,
+     "height": 633
+    },
+    "notes": [],
+    "pngMagic": true,
+    "minBytes": 91371,
+    "dimsOk": true
+   },
+   {
+    "file": "skills_d2-diagrams_examples_model-views_view-full.d2.pptx",
+    "ok": true,
+    "error": null,
+    "slides": 1,
+    "canvas": {
+     "width": 1228,
+     "height": 633
+    },
+    "notes": [],
+    "pngMagic": true,
+    "minBytes": 91371,
+    "dimsOk": true
+   },
+   {
+    "file": "skills_d2-diagrams_examples_model-views_view-payment-flow.d2.pptx",
+    "ok": true,
+    "error": null,
+    "slides": 1,
+    "canvas": {
+     "width": 310,
+     "height": 596
+    },
+    "notes": [],
+    "pngMagic": true,
+    "minBytes": 27740,
+    "dimsOk": true
+   },
+   {
+    "file": "skills_d2-diagrams_examples_model-views_view-read-path.d2.pptx",
+    "ok": true,
+    "error": null,
+    "slides": 1,
+    "canvas": {
+     "width": 504,
+     "height": 286
+    },
+    "notes": [],
+    "pngMagic": true,
+    "minBytes": 30676,
+    "dimsOk": true
+   },
+   {
+    "file": "skills_d2-diagrams_examples_sequence.d2.pptx",
+    "ok": true,
+    "error": null,
+    "slides": 1,
+    "canvas": {
+     "width": 846,
+     "height": 1497
+    },
+    "notes": [],
+    "pngMagic": true,
+    "minBytes": 193998,
+    "dimsOk": true
+   },
+   {
+    "file": "skills_d2-diagrams_examples_stress_bank-tco.d2.pptx",
+    "ok": true,
+    "error": null,
+    "slides": 1,
+    "canvas": {
+     "width": 2433,
+     "height": 1477
+    },
+    "notes": [],
+    "pngMagic": true,
+    "minBytes": 495617,
+    "dimsOk": true
+   },
+   {
+    "file": "skills_d2-diagrams_examples_stress_clos-network.d2.pptx",
+    "ok": true,
+    "error": null,
+    "slides": 1,
+    "canvas": {
+     "width": 1314,
+     "height": 853
+    },
+    "notes": [],
+    "pngMagic": true,
+    "minBytes": 191098,
+    "dimsOk": true
+   },
+   {
+    "file": "skills_d2-diagrams_examples_stress_erd-analytics.d2.pptx",
+    "ok": true,
+    "error": null,
+    "slides": 1,
+    "canvas": {
+     "width": 1411,
+     "height": 982
+    },
+    "notes": [],
+    "pngMagic": true,
+    "minBytes": 156012,
+    "dimsOk": true
+   },
+   {
+    "file": "skills_d2-diagrams_examples_stress_kpi-dashboard.d2.pptx",
+    "ok": true,
+    "error": null,
+    "slides": 1,
+    "canvas": {
+     "width": 1122,
+     "height": 1094
+    },
+    "notes": [],
+    "pngMagic": true,
+    "minBytes": 137678,
+    "dimsOk": true
+   },
+   {
+    "file": "skills_d2-diagrams_examples_stress_queue-workers.d2.pptx",
+    "ok": true,
+    "error": null,
+    "slides": 1,
+    "canvas": {
+     "width": 794,
+     "height": 1342
+    },
+    "notes": [],
+    "pngMagic": true,
+    "minBytes": 156453,
+    "dimsOk": true
+   },
+   {
+    "file": "skills_d2-diagrams_examples_stress_terraform-dbtlabs.d2.pptx",
+    "ok": true,
+    "error": null,
+    "slides": 1,
+    "canvas": {
+     "width": 2976,
+     "height": 2272
+    },
+    "notes": [],
+    "pngMagic": true,
+    "minBytes": 708237,
+    "dimsOk": true
+   },
+   {
+    "file": "skills_d2-diagrams_examples_uml-class.d2.pptx",
+    "ok": true,
+    "error": null,
+    "slides": 1,
+    "canvas": {
+     "width": 704,
+     "height": 1068
+    },
+    "notes": [],
+    "pngMagic": true,
+    "minBytes": 56700,
+    "dimsOk": true
+   }
+  ]
+ },
+ "gates": [
+  {
+   "id": "G1",
+   "desc": "every example renders with its pinned vars",
+   "pass": true,
+   "failures": []
+  },
+  {
+   "id": "G2",
+   "desc": "showcase + model-views + stress pin layout engine and theme (R1)",
+   "pass": true,
+   "failures": []
+  },
+  {
+   "id": "G3",
+   "desc": "showcase + model-views + stress label every connection (R5)",
+   "pass": true,
+   "failures": []
+  },
+  {
+   "id": "G4",
+   "desc": "horizontal-genre showcase + stress aspect in 0.4..2.5 band (R2)",
+   "pass": true,
+   "failures": []
+  },
+  {
+   "id": "G5",
+   "desc": "pptx export -> read-back: labels, connectors, geometry",
+   "pass": false,
+   "failures": [
+    "skills/d2-diagrams/examples/stress/bank-tco.d2: connectors 9 < connections 12",
+    "skills/d2-diagrams/examples/stress/erd-analytics.d2: 1 label(s) missing: order_items",
+    "skills/d2-diagrams/examples/stress/terraform-dbtlabs.d2: 1 label(s) missing: conns"
+   ]
+  },
+  {
+   "id": "G6",
+   "desc": "every exported pptx rasterizes to valid PNGs (vision feed)",
+   "pass": true,
+   "failures": []
+  }
+ ],
+ "gateSummary": "G1=pass G2=pass G3=pass G4=pass G5=FAIL G6=pass"
+}

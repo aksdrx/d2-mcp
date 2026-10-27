@@ -74,15 +74,15 @@ export async function auditExamples(root, { log = () => {} } = {}) {
       log('OK ' + e.file + ' — a=' + e.a + ' cross=' + e.cross + ' unlabeled=' + e.unlabeled);
     }
     const g = (id, desc, pass, failures) => ({ id, desc, pass, failures: failures || [] });
-    const gated = entries.filter((e) => e.set === 'showcase' || e.set === 'model-views');
+    const gated = entries.filter((e) => ['showcase', 'model-views', 'stress'].includes(e.set));
     const gates = [
       g('G1', 'every example renders with its pinned vars', entries.every((e) => e.renderOk),
         entries.filter((e) => !e.renderOk).map((e) => e.file + ': ' + (e.renderErr || ''))),
-      g('G2', 'showcase + model-views pin layout engine and theme (R1)', gated.every((e) => e.pinnedEngine && e.pinnedTheme != null),
+      g('G2', 'showcase + model-views + stress pin layout engine and theme (R1)', gated.every((e) => e.pinnedEngine && e.pinnedTheme != null),
         gated.filter((e) => !(e.pinnedEngine && e.pinnedTheme != null)).map((e) => e.file)),
-      g('G3', 'showcase + model-views label every connection (R5)', gated.every((e) => e.unlabeled === 0),
+      g('G3', 'showcase + model-views + stress label every connection (R5)', gated.every((e) => e.unlabeled === 0),
         gated.filter((e) => e.unlabeled > 0).map((e) => e.file + ': ' + e.unlabeled + ' unlabeled')),
-      g('G4', 'horizontal-genre showcase aspect in 0.4..2.5 band (R2)', gated.every((e) => e.kind === 'sequence' || (e.a != null && e.a >= 0.4 && e.a <= 2.5)),
+      g('G4', 'horizontal-genre showcase + stress aspect in 0.4..2.5 band (R2)', gated.every((e) => e.kind === 'sequence' || (e.a != null && e.a >= 0.4 && e.a <= 2.5)),
         gated.filter((e) => e.kind !== 'sequence' && (e.a == null || e.a < 0.4 || e.a > 2.5)).map((e) => e.file + ': a=' + e.a)),
     ];
     return { entries, gates };

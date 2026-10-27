@@ -18,7 +18,7 @@ const renderLines = (label) =>
   String(label)
     .replace(/\\u([0-9a-fA-F]{4})/g, (_, h) => String.fromCharCode(parseInt(h, 16)))
     .split('\n')
-    .map((l) => l.replace(/^[\s#>*-]+/, '').replace(/[*_`]/g, '').trim())
+    .map((l) => l.replace(/^[\s#>*-]+/, '').replace(/[*`]/g, '').trim())
     .filter(Boolean);
 const isSequence = (model) =>
   (model.boardAttrs && model.boardAttrs.shape === 'sequence_diagram') ||
@@ -31,6 +31,7 @@ export function discoverExamples(root) {
     ['model-views', 'skills/d2-diagrams/examples/model-views'],
     ['comprehension', 'skills/d2-diagrams/examples/comprehension'],
     ['adversarial', 'skills/d2-diagrams/examples/adversarial'],
+    ['stress', 'skills/d2-diagrams/examples/stress'],
   ];
   const files = [];
   for (const [set, rel] of sets)

@@ -1,0 +1,89 @@
+# authored — wide analytics ERD (9 tables, column-level keys); quantitative: row counts + retentions
+vars: {
+  d2-config: {
+    layout-engine: elk
+    theme-id: 105
+    pad: 40
+  }
+}
+
+users: "users | 8.2M rows | hot" {
+  shape: sql_table
+  id: bigint {constraint: primary_key}
+  email: varchar(320)
+  plan: enum
+  created_at: timestamptz
+}
+
+sessions: "sessions | 410M rows | 90d" {
+  shape: sql_table
+  id: uuid {constraint: primary_key}
+  user_id: bigint {constraint: foreign_key}
+  started_at: timestamptz
+  device: varchar(64)
+}
+
+events: "events | 61B rows | 30d" {
+  shape: sql_table
+  id: bigserial {constraint: primary_key}
+  session_id: uuid {constraint: foreign_key}
+  name: varchar(128)
+  props: jsonb
+  ingested_at: timestamptz
+}
+
+orders: "orders | 31M rows" {
+  shape: sql_table
+  id: bigserial {constraint: primary_key}
+  user_id: bigint {constraint: foreign_key}
+  total_cents: int
+  status: enum
+}
+
+order_items: "order_items | 74M rows" {
+  shape: sql_table
+  id: bigserial {constraint: primary_key}
+  order_id: bigint {constraint: foreign_key}
+  product_id: bigint {constraint: foreign_key}
+  qty: int
+  unit_cents: int
+}
+
+products: "products | 420K rows" {
+  shape: sql_table
+  id: bigserial {constraint: primary_key}
+  sku: varchar(64)
+  price_cents: int
+}
+
+refunds: "refunds | 1.1M rows | 180d" {
+  shape: sql_table
+  id: bigserial {constraint: primary_key}
+  order_id: bigint {constraint: foreign_key}
+  reason: varchar(256)
+  amount_cents: int
+}
+
+dim_dates: dim_dates {
+  shape: sql_table
+  date: date {constraint: primary_key}
+  iso_week: int
+  quarter: int
+}
+
+funnels: "funnels | 5K rows" {
+  shape: sql_table
+  id: bigserial {constraint: primary_key}
+  step_events: "text[]"
+}
+
+users.id <- sessions.user_id
+users.id <- orders.user_id
+sessions.id <- events.session_id
+orders.id <- order_items.order_id
+products.id <- order_items.product_id
+orders.id <- refunds.order_id
+funnels -- events: step match on name
+dim_dates -- orders: rollup by created_at::date
+
+direction: right

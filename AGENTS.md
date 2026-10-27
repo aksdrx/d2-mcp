@@ -26,9 +26,12 @@ For EVERY diagram you create or edit, run this loop until it passes:
 ```sh
 d2 fmt diagram.d2          # normalize formatting (idempotent)
 d2 validate diagram.d2     # MUST exit 0 — fix and repeat until it does
-d2 --layout=elk  --direction=right diagram.d2 a.svg  # layout bake-off:
-d2 --layout=elk  --direction=down  diagram.d2 b.svg  # render 2+ variants,
-d2 --layout=dagre --direction=right diagram.d2 c.svg  # inspect, pick the winner
+# layout bake-off (d2 v0.9.0 has NO --direction CLI flag — direction is set
+# in-language, so bake variants by swapping the `direction:` line in tmp copies;
+# scripts pattern: .audit-render/bake.mjs approach in the audit folder):
+d2 --layout=elk  tmp-right.d2 a.svg   # render 2+ variants,
+d2 --layout=elk  tmp-down.d2  b.svg   # inspect, pick the winner
+d2 --layout=dagre tmp-right.d2 c.svg
 ```
 
 Never claim a diagram is "done" without a successful `d2 validate`. Never use the

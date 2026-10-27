@@ -26,9 +26,10 @@ CI runs the full audit on every push/PR (`.github/workflows/ci.yml`).
 ## The three planes
 
 1. **Source plane (G1–G4)** — every example renders with its pinned vars,
-   showcase + model-views pin engine/theme (R1), label connections (R5),
-   aspect floor 0.4..2.5 (R2). Adversarial fixtures are metrics-only: they
-   exist to prove the gates *can* fail.
+   showcase + model-views + stress pin engine/theme (R1), label connections
+   (R5), aspect floor 0.4..2.5 (R2). The `stress/` set holds web-sourced
+   quantitative/complex diagrams (sources cited in file headers); adversarial
+   fixtures are metrics-only: they exist to prove the gates *can* fail.
 2. **pptx fidelity plane (G5)** — `d2_pptx` export → `d2_pptx_read` ingest:
    labels, connector counts, geometry drift ≤ 3px.
 3. **pptx render plane (G6)** — every exported deck rasterizes to valid PNGs

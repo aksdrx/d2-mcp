@@ -1,0 +1,44 @@
+# authored after https://infrastructureascode.ch/d2-network-topologies.html (CLOS fabric pattern)
+# quantitative: AS numbers, uplink capacity, ECMP, per-rack CIDRs
+vars: {
+  d2-config: {
+    layout-engine: dagre
+    theme-id: 105
+    pad: 40
+  }
+}
+
+direction: down
+
+spine01: Spine 01\nAS 65001
+spine02: Spine 02\nAS 65001
+
+rack1: Rack 1 {
+  leaf01: Leaf 01\nAS 65101
+  host01: host-01\n10.0.1.11/24
+  host02: host-02\n10.0.1.12/24
+  leaf01 -> host01: bond0 10G
+  leaf01 -> host02: bond0 10G
+}
+rack2: Rack 2 {
+  leaf02: Leaf 02\nAS 65102
+  host03: host-03\n10.0.2.11/24
+  host04: host-04\n10.0.2.12/24
+  leaf02 -> host03: bond0 10G
+  leaf02 -> host04: bond0 10G
+}
+rack3: Rack 3 {
+  leaf03: Leaf 03\nAS 65103
+  host05: host-05\n10.0.3.11/24
+  host06: host-06\n10.0.3.12/24
+  leaf03 -> host05: bond0 10G
+  leaf03 -> host06: bond0 10G
+}
+
+spine01 -> rack1.leaf01: 2x40G LACP
+spine01 -> rack2.leaf02: 2x40G LACP
+spine01 -> rack3.leaf03: 2x40G LACP
+spine02 -> rack1.leaf01: 2x40G LACP
+spine02 -> rack2.leaf02: 2x40G LACP
+spine02 -> rack3.leaf03: 2x40G LACP
+spine01 <-> spine02: iBGP underlay

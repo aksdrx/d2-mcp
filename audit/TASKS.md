@@ -14,6 +14,13 @@
 
 ## Planned
 
+- [ ] **Stress-plane growth** — the stress set (6 files) covers quantitative
+  labels, sql_tables, grids, classes/glob styles, dense terraform graphs. Gap
+  candidates for the next round: sequence with quantitative annotations,
+  >10-container org charts, icon-heavy topology (icons currently stripped for
+  offline CI), near-2.5 aspect stress. (corpus + gates already cover new
+  files automatically via discoverExamples)
+
 - [ ] **P4-A: segment-accurate pptx connector routes** — today a d2 route
   (bezier with waypoints) exports as one straight `line` shape (bbox diagonal).
   Decompose svgmap routes into straight segments, emit one `line` shape per

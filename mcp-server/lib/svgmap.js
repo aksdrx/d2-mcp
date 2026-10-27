@@ -162,8 +162,12 @@ export function analyzeSvg(svgText, opts = {}) {
   for (let ti = 0; ti < topLevel.length; ti++) {
     const chunk = topLevel[ti].text;
     const chunkStart = topLevel[ti].start;
-    const cls = (chunk.match(/class="([^"]*)"/) || [])[1];
-    if (!cls) continue;
+    const clsFull = (chunk.match(/class="([^"]*)"/) || [])[1];
+    if (!clsFull) continue;
+    // class attrs may carry css classes after the b64 id token ("<b64id> blue"
+    // from `(...)[*].class: blue`) — Node base64 silently skips the space and
+    // decodes the css name INTO the id, corrupting it. Use the first token only.
+    const cls = clsFull.trim().split(/\s+/)[0];
     // Connections render as "K" + base64("(src OP dst)[i]") — test the stripped
     // form FIRST: a naive full decode of "K..." yields printable garbage.
     const stripped = cls.startsWith("K") ? decodeId(cls.slice(1)) : null;
