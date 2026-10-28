@@ -29,8 +29,11 @@ current platform:
 3. `d2 validate file.d2` — must exit 0. Fix errors; repeat.
 4. Render **variants and inspect the SVG** — never ship the first render: compare
    2+ `--layout`/`--direction` combos (layout bake-off), then apply a restrained
-   style pass. Judge crossings, aspect, label fit. `reference/visual-quality.md`
-   is the full checklist; MCP users: one `d2_variants` call renders a whole stage.
+   style pass. Judge crossings, aspect, label fit — **and check the reading-order
+   semantics** (entry/exit anchors on opposite sides, homogeneous components adjacent,
+   crossings spent at hubs): `reference/layout-semantics.md` is the rule,
+   `reference/visual-quality.md` the full checklist. MCP users: one `d2_variants`
+   call renders a whole stage.
 5. For live iteration offer `d2 -w file.d2 out.svg` (watch mode + browser reload).
 
 ## Minimal D2 in 30 seconds
@@ -166,6 +169,9 @@ See `mcp-server/README.md`.
 - `reference/composition.md` — layers, scenarios, steps, boards, links, imports
 - `reference/models-views.md` — model-view pattern, dual-plane JSON contract,
   verifying code against diagrams
+- `reference/layout-semantics.md` — the reading-order rule: flow axis, opposite
+  entry/exit anchors, homogeneous-component adjacency, hub-concentrated crossings,
+  label-fit; how to pin, search, and verify layouts mechanically
 - `reference/visual-quality.md` — human-plane refinement ladder: layout bake-off,
   crossings, aspect, monochrome-first styling (R1–R6)
 - `reference/verifying-comprehension.md` — benchmark + procedure proving a
